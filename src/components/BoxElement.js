@@ -2,9 +2,10 @@ import React from "react";
 
 import { motion } from "framer-motion";
 
-const BoxElement = ({ color, itemIndex = "", colorName = "" }) => {
+const BoxElement = ({ id, color, itemIndex = "", colorName = "" }) => {
   return (
     <motion.div
+      id={id}
       style={{
         background: color,
         display: "flex",

@@ -223,10 +223,21 @@ const Game = () => {
   //     );
   //   }, []);
 
+  function getUniqueColorIndex() {
+    const randomIndex = Math.floor(Math.random() * cssColors.length);
+    if (gameSettings.colorIndexList?.includes(randomIndex)) {
+      return getUniqueColorIndex();
+    }
+
+    return randomIndex;
+  }
+
   // box game board shape
   useEffect(() => {
     const boxBoard = [];
     let boxRow = [];
+    let colorIndexList = [];
+    let colorList = [];
 
     // function getRandomColors() {
     // let colorIndexList = [];
@@ -253,14 +264,19 @@ const Game = () => {
     // const colorArray = getRandomColors();
 
     for (let i = 0; i < gameSettings.itemCount; i++) {
+      const colorIndex = getUniqueColorIndex();
+      colorIndexList.push(colorIndex);
+      colorList.push(cssColors[colorIndex]);
+
       boxRow.push(
         <Col key={i} className="d-flex justify-content-center">
           <BoxElement
+            id={`gamebox-${cssColors[colorIndex].hex.replace("#", "")}`}
             itemIndex={gameSettings.showItemIndex ? i : ""}
             colorName={
-              gameSettings.showColorName ? gameSettings.gameColors[i].name : ""
+              gameSettings.showColorName ? cssColors[colorIndex].name : ""
             }
-            color={gameSettings.gameColors[i].hex}
+            color={cssColors[colorIndex].hex}
           />
         </Col>
       );
@@ -282,6 +298,11 @@ const Game = () => {
     }
 
     setBoxBoard(boxBoard);
+    setGameSettings({
+      ...gameSettings,
+      gameColorsIndex: colorIndexList,
+      gameColors: colorList,
+    });
   }, [gameSettings.itemCount]);
 
   console.log(gameSettings);
@@ -303,6 +324,22 @@ const Game = () => {
       itemCount: e1.target.value,
       boxRows: rows,
     });
+  };
+
+  const handleColorChange = (e1, e2) => {
+    console.log(e1.target.value);
+    console.dir(e1.target.dataset.index);
+    console.dir(e1.target);
+
+    let newColors = [...gameSettings.gameColors];
+    newColors.splice(e1.target.dataset.index, 1, {
+      ...gameSettings.gameColors[e1.target.dataset.index],
+      custom: true,
+      name: `Custom ${e1.target.dataset.index}`,
+      hex: e1.target.value,
+    });
+
+    setGameSettings({ ...gameSettings, gameColors: newColors });
   };
 
   return (
@@ -385,9 +422,18 @@ const Game = () => {
                 (_, itemIndex) => (
                   <Form.Control
                     key={`color-${itemIndex}`}
+                    data-index={itemIndex}
+                    style={{
+                      height: "2rem",
+                      width: "2.5rem",
+                      paddingLeft: ".5rem",
+                      paddingRight: ".5rem",
+                    }}
+                    className="flex-grow-0"
                     type="color"
-                    defaultValue={gameSettings.gameColors[itemIndex]}
+                    value={gameSettings.gameColors[itemIndex].hex}
                     title={`Color ${itemIndex}`}
+                    onChange={handleColorChange}
                   />
                 )
               )}
