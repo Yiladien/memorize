@@ -13,3 +13,32 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+.svg-button svg {
+  fill: #ffffff;
+  filter: drop-shadow(-0.5px 0.5px 0.02em rgb(0 0 0 / 1));
+  position: absolute;
+}
+
+.svg-button:hover svg {
+  top: -1px;
+  left: 1px;
+  filter: drop-shadow(-1.5px 1.5px 0.06em rgb(0 0 0 / 1));
+}
+
+.svg-button input:focus {
+  box-shadow: none;
+}
+
+.hidden-hover .svg-button {
+  visibility: hidden;
+}
+
+.hidden-hover:hover .svg-button {
+  visibility: visible;
+}
+
+.plain-text-input {
+  border: 1px solid white;
+  background-color: lightgray;
+}

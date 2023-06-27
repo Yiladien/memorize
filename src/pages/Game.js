@@ -9,6 +9,7 @@ import Accordion from "react-bootstrap/Accordion";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Dropdown from "react-bootstrap/Dropdown";
+import Button from "react-bootstrap/Button";
 
 import BoxElement from "../components/BoxElement";
 
@@ -288,7 +289,7 @@ const Game = () => {
         boxBoard.push(
           <Row
             key={`row-${((i + 1) / gameSettings.boxRows).toFixed(1)}`}
-            className="d-flex justify-content-center flex-wrap g-2 row-cols-auto"
+            className="d-flex justify-content-center flex-wrap g-2 row-cols-auto mb-2"
           >
             {boxRow}
           </Row>
@@ -358,7 +359,7 @@ const Game = () => {
     .accordion-body,
     h1, h2, h3, h4, h5, h6, div {
     //   background-color: purple;
-      box-shadow: inset 0px 0px 0px 2px white;
+    //   box-shadow: inset 0px 0px 0px 2px white;
     }
 
     .box-element {
@@ -372,89 +373,81 @@ const Game = () => {
 
       {/* end testing area */}
 
-      <Container fluid>
-        <Row>
-          <Col>
-            <h1>Contact Me</h1>
-          </Col>
-        </Row>
-      </Container>
-      <Container fluid>
-        {/* <Row ref={scope}> */}
-        <Row>
-          <Col>
-            <h1>Contact Me</h1>
-          </Col>
-        </Row>
-      </Container>
-      <Accordion defaultActiveKey="1" alwaysOpen flush>
-        <Accordion.Item eventKey="0">
-          <Accordion.Header>Game Settings</Accordion.Header>
-          <Accordion.Body>
-            <Dropdown data-bs-theme="dark" onSelect={handleDropdown}>
-              <Dropdown.Toggle
-                id="shape-dropdown"
-                variant="secondary"
-                className="text-capitalize"
+      <Container className="pt-5">
+        <Accordion defaultActiveKey="1" alwaysOpen flush>
+          <Accordion.Item eventKey="0">
+            <Accordion.Header>Game Settings</Accordion.Header>
+            <Accordion.Body>
+              <Dropdown
+                data-bs-theme="dark"
+                className="mb-2"
+                onSelect={handleDropdown}
               >
-                {gameSettings.shape}
-              </Dropdown.Toggle>
+                <Dropdown.Toggle
+                  id="shape-dropdown"
+                  variant="secondary"
+                  className="text-capitalize"
+                >
+                  {gameSettings.shape}
+                </Dropdown.Toggle>
 
-              <Dropdown.Menu>
-                <Dropdown.Item eventKey="box">Box</Dropdown.Item>
-                <Dropdown.Item eventKey="circle">Circle</Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-            <InputGroup size="sm" className="mb-3">
-              <InputGroup.Text># of items</InputGroup.Text>
-              <Form.Control
-                aria-label="number-of-items"
-                aria-describedby="number-of-items-to-memorize"
-                value={gameSettings.itemCount}
-                onChange={handleChange}
-              />
-              <Form.Range
-                onChange={handleChange}
-                value={gameSettings.itemCount}
-              />
-              {Array.from(
-                { length: gameSettings.itemCount },
-                (_, itemIndex) => (
-                  <Form.Control
-                    key={`color-${itemIndex}`}
-                    data-index={itemIndex}
-                    style={{
-                      height: "2rem",
-                      width: "2.5rem",
-                      paddingLeft: ".5rem",
-                      paddingRight: ".5rem",
-                    }}
-                    className="flex-grow-0"
-                    type="color"
-                    value={gameSettings.gameColors[itemIndex].hex}
-                    title={`Color ${itemIndex}`}
-                    onChange={handleColorChange}
-                  />
-                )
-              )}
-            </InputGroup>
-            <InputGroup size="sm" className="mb-3">
-              <InputGroup.Text id="inputGroup-sizing-sm">
-                # of items
-              </InputGroup.Text>
-              <Form.Control
-                aria-label="Small"
-                aria-describedby="inputGroup-sizing-sm"
-              />
-              <Form.Range />
-            </InputGroup>
-          </Accordion.Body>
-        </Accordion.Item>
-        <Accordion.Item eventKey="1">
-          <Accordion.Header>Memorize</Accordion.Header>
-          <Accordion.Body>
-            {gameSettings.shape === "box" ? boxBoard : null}
-            {/* {gameSettings.shape === "circle"
+                <Dropdown.Menu>
+                  <Dropdown.Item eventKey="box">Box</Dropdown.Item>
+                  <Dropdown.Item eventKey="circle">Circle</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+              <InputGroup variant="secondary" size="sm" className="mb-2">
+                <Button variant="secondary" className="pe-none">
+                  # of items
+                </Button>
+                <Form.Control
+                  aria-label="number-of-items"
+                  aria-describedby="number-of-items-to-memorize"
+                  value={gameSettings.itemCount}
+                  onChange={handleChange}
+                />
+                <Form.Range
+                  onChange={handleChange}
+                  value={gameSettings.itemCount}
+                />
+                {Array.from(
+                  { length: gameSettings.itemCount },
+                  (_, itemIndex) => (
+                    <Form.Control
+                      key={`color-${itemIndex}`}
+                      data-index={itemIndex}
+                      style={{
+                        height: "2rem",
+                        width: "2.5rem",
+                        paddingLeft: ".5rem",
+                        paddingRight: ".5rem",
+                      }}
+                      className="flex-grow-0"
+                      type="color"
+                      value={gameSettings.gameColors[itemIndex].hex}
+                      title={`Color ${itemIndex}`}
+                      onChange={handleColorChange}
+                    />
+                  )
+                )}
+              </InputGroup>
+              <InputGroup size="sm" className="mb-2">
+                <Button variant="secondary" className="pe-none">
+                  # of items
+                </Button>
+                <Form.Control
+                  aria-label="Small"
+                  aria-describedby="inputGroup-sizing-sm"
+                />
+                <Form.Range />
+              </InputGroup>
+            </Accordion.Body>
+          </Accordion.Item>
+          <Accordion.Item eventKey="1">
+            <Accordion.Header>Memorize</Accordion.Header>
+            <Accordion.Body>
+              {gameSettings.shape === "box" ? boxBoard : null}
+              {/* {gameSettings.shape === "circle"
               ? gameSettings.itemCountArr.map((_, elIndex) => (
                   <Row className="d-flex justify-content-center flex-wrap g-2 row-cols-auto">
                     <Col
@@ -466,9 +459,10 @@ const Game = () => {
                   </Row>
                 ))
               : null} */}
-          </Accordion.Body>
-        </Accordion.Item>
-      </Accordion>
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
+      </Container>
     </>
   );
 };
