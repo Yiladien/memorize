@@ -166,7 +166,7 @@ const Game = () => {
     shape: "box",
     itemCount: 5,
     itemCountArr: [...Array(5)],
-    colorIndexList: [],
+    colorList: [],
     gameColors: [
       { custom: false, cssColorsIndex: 10, name: "Blue", hex: "#0000FF" },
       { custom: false, cssColorsIndex: 114, name: "Red", hex: "#FF0000" },
@@ -277,7 +277,7 @@ const Game = () => {
       ...gameSettings,
       gameColors: colorList,
     });
-  }, [gameSettings.itemCount]);
+  }, [gameSettings.itemCount, gameSettings.itemCount]);
 
   console.log(gameSettings);
 
@@ -291,13 +291,13 @@ const Game = () => {
     // e2 && console.log("e2", e2);
     // e3 && console.log("e3", e3);
 
-    let colorIndexList = [...gameSettings.cssColorIndexList];
+    // let colorList = [...gameSettings.gameColors];
 
-    if (colorIndexList.length < e1.target.value) {
-      for (let i = 0; i < e1.target.value - colorIndexList.length; i++) {
-        colorIndexList.push(getUniqueColor());
-      }
-    }
+    // if (colorList.length < e1.target.value) {
+    //   for (let i = 0; i < e1.target.value - colorList.length; i++) {
+    //     colorList.push(getUniqueColor());
+    //   }
+    // }
 
     const rows = Math.ceil(Math.sqrt(Number(e1.target.value)));
     e1 && console.log("rows", rows);
@@ -306,7 +306,7 @@ const Game = () => {
       ...gameSettings,
       itemCount: e1.target.value,
       boxRows: rows,
-      cssColorIndexList: colorIndexList,
+      //   cssColorIndexList: colorList,
     });
   };
 
@@ -393,7 +393,8 @@ const Game = () => {
                   onChange={handleChange}
                   value={gameSettings.itemCount}
                 />
-                {Array.from(
+                {/* needs useEffect since state is not set immediately */}
+                {/* {Array.from(
                   { length: gameSettings.itemCount },
                   (_, itemIndex) => (
                     <Form.Control
@@ -412,7 +413,7 @@ const Game = () => {
                       onChange={handleColorChange}
                     />
                   )
-                )}
+                )} */}
               </InputGroup>
               <InputGroup size="sm" className="mb-2">
                 <Button variant="secondary" className="pe-none">
