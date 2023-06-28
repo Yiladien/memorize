@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 
 import Form from "react-bootstrap/Form";
 
@@ -7,8 +7,7 @@ import {
   PencilFill,
   Palette,
   PaletteFill,
-  SaveFill,
-  Save2Fill,
+  CheckLg,
 } from "react-bootstrap-icons";
 
 import { motion } from "framer-motion";
@@ -20,14 +19,32 @@ const BoxElement = ({
   colorName = "",
   gameInProgress = false,
 }) => {
+  const nameRef = useRef(null);
+
+  const [editName, setEditName] = useState(colorName);
+
   const [toggleNameEdit, setToggleNameEdit] = useState(false);
 
   const handleChange = (e1) => {
     console.log("handleChange", e1.target.value);
+
+    setEditName(e1.target.value);
   };
 
-  const toggleEdit = () => {
+  const toggleEdit = (e1) => {
     console.log("toggleChange", `${toggleNameEdit} to ${!toggleNameEdit}`);
+    console.log("toggleChange", e1.currentTarget);
+
+    if (!toggleNameEdit) {
+      nameRef.current.focus();
+      nameRef.current.select();
+    }
+
+    if (toggleNameEdit && e1.target.name === "save") {
+      console.log("save new value");
+    } else {
+      setEditName(colorName);
+    }
 
     setToggleNameEdit(!toggleNameEdit);
   };
@@ -116,9 +133,9 @@ const BoxElement = ({
           }}
           className="svg-button "
         >
-          {toggleEdit ? (
+          {!toggleNameEdit ? (
             <PencilFill
-              name=""
+              name="edit"
               style={{
                 top: "50%",
                 transform: "translateY(-50%)",
@@ -126,7 +143,8 @@ const BoxElement = ({
               onClick={toggleEdit}
             />
           ) : (
-            <SaveFill
+            <CheckLg
+              name="save"
               style={{
                 top: "50%",
                 transform: "translateY(-50%)",
@@ -136,11 +154,13 @@ const BoxElement = ({
           )}
         </div>
         <Form.Control
-          className={`${!toggleNameEdit ? "plain-text-input" : ""}`}
+          ref={nameRef}
+          className={`${toggleNameEdit ? "plain-text-input" : ""}`}
           plaintext
-          readOnly={toggleNameEdit}
+          readOnly={!toggleNameEdit}
           onChange={handleChange}
-          value={colorName.replace(/([a-z])([A-Z])/g, "$1 $2")}
+          onBlur={toggleEdit}
+          value={editName.replace(/([a-z])([A-Z])/g, "$1 $2")}
         />
         {/* {colorName.replace(/([a-z])([A-Z])/g, "$1 $2")} */}
       </div>

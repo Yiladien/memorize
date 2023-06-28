@@ -1,5 +1,5 @@
 // import React from "react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 //bootstrap
 import Container from "react-bootstrap/Container";
@@ -166,33 +166,19 @@ const Game = () => {
     shape: "box",
     itemCount: 5,
     itemCountArr: [...Array(5)],
+    colorIndexList: [],
     gameColors: [
-      { name: "Blue", hex: "#0000FF" },
-      { name: "Red", hex: "#FF0000" },
-      { name: "Yellow", hex: "#FFFF00" },
-      { name: "Orange", hex: "#FFA500" },
-      { name: "Green", hex: "#008000" },
-      { name: "Purple", hex: "#800080" },
-      { name: "White", hex: "#FFFFFF" },
-      { name: "Black", hex: "#000000" },
-      { name: "Brown", hex: "#A52A2A" },
-      { name: "Gray", hex: "#808080" },
-      { name: "Aqua", hex: "#00FFFF" },
-      { name: "Teal", hex: "#008080" },
-      { name: "Pink", hex: "#FFC0CB" },
-      { name: "Plum", hex: "#DDA0DD" },
-      { name: "HotPink", hex: "#FF69B4" },
-      { name: "RoyalBlue", hex: "#4169E1" },
-      { name: "Tomato", hex: "#FF6347" },
-      { name: "SkyBlue", hex: "#87CEEB" },
-      { name: "YellowGreen", hex: "#9ACD32" },
-      { name: "Olive", hex: "#808000" },
-      { name: "DarkCyan", hex: "#008B8B" },
-      { name: "DarkRed", hex: "#8B0000" },
-      { name: "Chocolate", hex: "#D2691E" },
-      { name: "Salmon", hex: "#FA8072" },
-      { name: "Lime", hex: "#00FF00" },
-      { name: "DarkViolet", hex: "#9400D3" },
+      { custom: false, cssColorsIndex: 10, name: "Blue", hex: "#0000FF" },
+      { custom: false, cssColorsIndex: 114, name: "Red", hex: "#FF0000" },
+      { custom: false, cssColorsIndex: 139, name: "Yellow", hex: "#FFFF00" },
+      { custom: false, cssColorsIndex: 99, name: "Orange", hex: "#FFA500" },
+      { custom: false, cssColorsIndex: 51, name: "Green", hex: "#008000" },
+      { custom: false, cssColorsIndex: 112, name: "Purple", hex: "#800080" },
+      { custom: false, cssColorsIndex: 137, name: "White", hex: "#FFFFFF" },
+      { custom: false, cssColorsIndex: 7, name: "Black", hex: "#000000" },
+      { custom: false, cssColorsIndex: 11, name: "Brown", hex: "#A52A2A" },
+      { custom: false, cssColorsIndex: 50, name: "Gray", hex: "#808080" },
+      { custom: false, cssColorsIndex: 2, name: "Aqua", hex: "#00FFFF" },
     ],
     boxRows: 3,
     showItemIndex: true,
@@ -205,6 +191,20 @@ const Game = () => {
 
   const [boxBoard, setBoxBoard] = useState([]);
 
+  function getUniqueColor() {
+    const randomCssColor =
+      cssColors[Math.floor(Math.random() * cssColors.length)];
+
+    if (
+      gameSettings.gameColors.find(
+        (gameColor) => gameColor.hex === randomCssColor.hex
+      )
+    ) {
+      return getUniqueColor();
+    }
+
+    return randomCssColor;
+  }
   // device orientation
   //   useEffect(() => {
   //     setDeviceSettings({
@@ -224,71 +224,44 @@ const Game = () => {
   //     );
   //   }, []);
 
-  function getUniqueColorIndex() {
-    const randomIndex = Math.floor(Math.random() * cssColors.length);
-    if (gameSettings.colorIndexList?.includes(randomIndex)) {
-      return getUniqueColorIndex();
-    }
-
-    return randomIndex;
-  }
-
-  // box game board shape
+  // box game board shape and colors
   useEffect(() => {
     const boxBoard = [];
     let boxRow = [];
-    let colorIndexList = [];
-    let colorList = [];
 
-    // function getRandomColors() {
-    // let colorIndexList = [];
-    //   const randomIndex = Math.floor(Math.random() * cssColors.length);
-    //   if(colorIndexList.includes(randomIndex)) {
-    //     return getRandomColors();
-    // }
-    // colorIndexList.push(randomIndex);
+    // creating copy of color list array
+    let colorList = [...gameSettings.gameColors];
 
-    // if (colorIndexList.length === gameSettings.itemCount) {
-    //     const randomColorArray = [];
+    // adding new colors if value increases as needed. Keeping old values to retain colors that may have already been accepted or changed by user
+    for (
+      let i = 0;
+      i < gameSettings.itemCount - gameSettings.gameColors.length;
+      i++
+    ) {
+      colorList.push(getUniqueColor());
+    }
 
-    //     colorIndexList.forEach(randIndex => {
-    //         randomColorArray.push(cssColors[randIndex])
-    //     });
-
-    //     return randomColorArray;
-    // } else {
-    //     getRandomColors();
-    // }
-
-    // }
-
-    // const colorArray = getRandomColors();
-
-    for (let i = 0; i < gameSettings.itemCount; i++) {
-      const colorIndex = getUniqueColorIndex();
-      colorIndexList.push(colorIndex);
-      colorList.push(cssColors[colorIndex]);
-
+    // createing a box element for each item color in game.
+    for (let j = 0; j < gameSettings.itemCount; j++) {
       boxRow.push(
-        <Col key={i} className="d-flex justify-content-center">
+        <Col key={j} className="d-flex justify-content-center">
           <BoxElement
-            id={`gamebox-${cssColors[colorIndex].hex.replace("#", "")}`}
-            itemIndex={gameSettings.showItemIndex ? i : ""}
-            colorName={
-              gameSettings.showColorName ? cssColors[colorIndex].name : ""
-            }
-            color={cssColors[colorIndex].hex}
+            id={`gamebox-${colorList[j].hex.replace("#", "")}`}
+            // itemIndex={gameSettings.showItemIndex ? j : ""}
+            colorName={gameSettings.showColorName ? colorList[j].name : ""}
+            color={colorList[j].hex}
           />
         </Col>
       );
 
+      //   to create a square-ish shape, adding a row after each group of boxes match the row count. (determined by the form handleChange function)
       if (
-        (i + 1) % gameSettings.boxRows === 0 ||
-        i === gameSettings.itemCount - 1
+        (j + 1) % gameSettings.boxRows === 0 ||
+        j === gameSettings.itemCount - 1
       ) {
         boxBoard.push(
           <Row
-            key={`row-${((i + 1) / gameSettings.boxRows).toFixed(1)}`}
+            key={`row-${((j + 1) / gameSettings.boxRows).toFixed(1)}`}
             className="d-flex justify-content-center flex-wrap g-2 row-cols-auto mb-2"
           >
             {boxRow}
@@ -298,10 +271,10 @@ const Game = () => {
       }
     }
 
+    // setting states
     setBoxBoard(boxBoard);
     setGameSettings({
       ...gameSettings,
-      gameColorsIndex: colorIndexList,
       gameColors: colorList,
     });
   }, [gameSettings.itemCount]);
@@ -317,6 +290,15 @@ const Game = () => {
     // console.log("e1", e1);
     // e2 && console.log("e2", e2);
     // e3 && console.log("e3", e3);
+
+    let colorIndexList = [...gameSettings.cssColorIndexList];
+
+    if (colorIndexList.length < e1.target.value) {
+      for (let i = 0; i < e1.target.value - colorIndexList.length; i++) {
+        colorIndexList.push(getUniqueColor());
+      }
+    }
+
     const rows = Math.ceil(Math.sqrt(Number(e1.target.value)));
     e1 && console.log("rows", rows);
 
@@ -324,6 +306,7 @@ const Game = () => {
       ...gameSettings,
       itemCount: e1.target.value,
       boxRows: rows,
+      cssColorIndexList: colorIndexList,
     });
   };
 

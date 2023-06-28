@@ -31,14 +31,26 @@ code {
 }
 
 .hidden-hover .svg-button {
-  visibility: hidden;
+  visibility: visible;
 }
 
 .hidden-hover:hover .svg-button {
   visibility: visible;
 }
 
+.form-control-plaintext {
+  border: 0.15em solid transparent;
+  border-radius: 0.25em;
+  /* background-color: lightgray; */
+  line-height: 1em;
+  padding: 0.15em 0.15em;
+  color: black;
+  text-align: center;
+}
 .plain-text-input {
-  border: 1px solid white;
-  background-color: lightgray;
+  border: 0.15em solid white;
+  /* background-color: lightgray; */
+  line-height: 1em;
+  padding: 0.15em 0.15em;
+  color: black;
 }
