@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 import Form from "react-bootstrap/Form";
 
@@ -14,36 +14,79 @@ import { motion } from "framer-motion";
 
 const BoxElement = ({
   id,
-  color,
-  itemIndex = "",
-  colorName = "",
+  showColorName = false,
+  showHex = false,
+  showBoxNum = false,
+  boxnum = "",
+  gameColor = { customName: false, name: "", hex: "" },
   gameInProgress = false,
+  updateColor,
 }) => {
   const nameRef = useRef(null);
 
-  const [editName, setEditName] = useState(colorName);
+  const [editColor, setEditColor] = useState({ ...gameColor });
 
   const [toggleNameEdit, setToggleNameEdit] = useState(false);
 
-  const handleChange = (e1) => {
-    console.log("handleChange", e1.target.value);
-
-    setEditName(e1.target.value);
-  };
-
-  const toggleEdit = (e1) => {
-    console.log("toggleChange", `${toggleNameEdit} to ${!toggleNameEdit}`);
-    console.log("toggleChange", e1.currentTarget);
-
-    if (!toggleNameEdit) {
+  useEffect(() => {
+    if (toggleNameEdit) {
       nameRef.current.focus();
       nameRef.current.select();
     }
+  }, [toggleNameEdit]);
 
-    if (toggleNameEdit && e1.target.name === "save") {
-      console.log("save new value");
-    } else {
-      setEditName(colorName);
+  //   toggleEdit
+  const toggleEdit = () => {
+    setToggleNameEdit(!toggleNameEdit);
+  };
+
+  // handleFormChange
+  const handleFormChange = (e1) => {
+    const keyName = e1.target.name;
+    const value =
+      keyName === "hex" ? e1.target.value.toUpperCase() : e1.target.value;
+
+    setEditColor({ ...editColor, [keyName]: value });
+  };
+
+  // handleFormChange
+  const handleColorBlur = (e1) => {
+    if (editColor.hex !== gameColor.hex) {
+      updateColor(e1.target.dataset.boxnum, {
+        customName: true,
+        name: !editColor.customName
+          ? `Custom ${e1.target.dataset.boxnum}`
+          : editColor.customName,
+        hex: editColor.hex,
+      });
+
+      setEditColor({
+        ...editColor,
+        customName: true,
+        name: !editColor.customName
+          ? `Custom ${e1.target.dataset.boxnum}`
+          : editColor.name,
+        hex: editColor.hex,
+      });
+    }
+
+    setToggleNameEdit(!toggleNameEdit);
+  };
+
+  const handleNameBlur = (e1) => {
+    if (editColor.name !== gameColor.name) {
+      updateColor(e1.target.dataset.boxnum, {
+        customName: true,
+        name: editColor.name,
+        hex: editColor.hex,
+      });
+
+      setEditColor({
+        ...editColor,
+        customName: true,
+        name: editColor.name,
+        hex: editColor.hex,
+      });
     }
 
     setToggleNameEdit(!toggleNameEdit);
@@ -53,40 +96,40 @@ const BoxElement = ({
     <motion.div
       id={id}
       style={{
-        background: color,
+        background: editColor.hex,
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
         paddingTop: ".5em",
         paddingBottom: ".5em",
+        paddingLeft: ".5em",
+        paddingRight: ".5em",
         color: "black",
         position: "relative",
+        boxShadow: "inset 0px 0px 0px 1px white",
       }}
       className="box-element font-monospace"
       whileHover={gameInProgress ? { scale: 1.2 } : null}
       whileTap={gameInProgress ? { scale: 0.9 } : null}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
     >
+      {/* color pallette */}
       <div
         style={{
           position: "absolute",
-          top: ".325em",
-          left: ".325em",
+          top: ".375em",
+          left: ".375em",
+          fontSize: ".875em",
         }}
         className="svg-button"
       >
         <PaletteFill
           style={{
             pointerEvents: "none",
-            //   top: ".325em",
-            //   left: ".325em",
-            //   border: "1px solid white",
           }}
         />
         <Form.Control
-          // key={`color-${itemIndex}`}
-          // data-index={itemIndex}
           style={{
             height: "1em",
             width: "1em",
@@ -98,71 +141,72 @@ const BoxElement = ({
             borderRadius: "none",
             backgroundColor: "transparent",
           }}
+          title="Edit Color"
+          data-boxnum={boxnum}
           className="flex-grow-0"
           type="color"
-          value={color}
-          onChange={handleChange}
-          // title={`Color ${itemIndex}`}
-          // onChange={handleColorChange}
+          value={editColor.hex}
+          onChange={handleFormChange}
+          onBlur={handleColorBlur}
+          name={"hex"}
         />
       </div>
-      <div>{itemIndex}</div>
       <div
         style={{
-          maxWidth: "85%",
-          maxHeight: "80%",
+          position: "absolute",
+          top: ".375em",
+          right: ".375em",
+          fontSize: ".875em",
+        }}
+        className="svg-button"
+      >
+        <PencilFill
+          name="edit"
+          style={{
+            transform: "translateX(-100%)",
+          }}
+          onClick={toggleEdit}
+          title="Edit Name"
+        />
+      </div>
+      <div>{boxnum + 1}</div>
+      <div
+        style={{
           fontSize: ".625em",
           wordWrap: "break-word",
           textAlign: "center",
-          position: "relative",
-          paddingLeft: "1em",
           left: "-.5em",
           overflow: "hidden",
-          //   boxShadow: "inset 0px 0px 0px 1px white",
+          boxShadow: "inset 0px 0px 0px 1px white",
         }}
-        className="hidden-hover"
       >
         <div
           style={{
-            position: "absolute",
-            left: ".15em",
-            height: "100%",
-            fontSize: ".75em",
-            // textAlign: "left",
-            // boxShadow: "inset 0px 0px 0px 1px white",
+            wordWrap: "break-word",
+            textAlign: "center",
+            position: "relative",
+            boxShadow: "inset 0px 0px 0px 1px orange",
           }}
-          className="svg-button "
         >
-          {!toggleNameEdit ? (
-            <PencilFill
-              name="edit"
-              style={{
-                top: "50%",
-                transform: "translateY(-50%)",
-              }}
-              onClick={toggleEdit}
-            />
-          ) : (
-            <CheckLg
-              name="save"
-              style={{
-                top: "50%",
-                transform: "translateY(-50%)",
-              }}
-              onClick={toggleEdit}
-            />
-          )}
+          <Form.Control
+            style={{
+              boxShadow: "inset 0px 0px 0px 1px green",
+            }}
+            ref={nameRef}
+            data-boxnum={boxnum}
+            name={`name`}
+            className={`${
+              toggleNameEdit ? "plain-text-input pointer" : "pe-none"
+            }`}
+            plaintext
+            readOnly={!toggleNameEdit}
+            disabled={!toggleNameEdit}
+            onChange={handleFormChange}
+            onBlur={handleNameBlur}
+            value={editColor.name.replace(/([a-z])([A-Z])/g, "$1 $2")}
+          />
         </div>
-        <Form.Control
-          ref={nameRef}
-          className={`${toggleNameEdit ? "plain-text-input" : ""}`}
-          plaintext
-          readOnly={!toggleNameEdit}
-          onChange={handleChange}
-          onBlur={toggleEdit}
-          value={editName.replace(/([a-z])([A-Z])/g, "$1 $2")}
-        />
-        {/* {colorName.replace(/([a-z])([A-Z])/g, "$1 $2")} */}
+        <div>{editColor.hex}</div>
       </div>
     </motion.div>
   );

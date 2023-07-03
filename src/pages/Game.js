@@ -162,27 +162,30 @@ const cssColors = [
 ];
 
 const Game = () => {
+  const [formValues, setFormValues] = useState({
+    minItems: 1,
+    maxItems: 100,
+    itemCount: 5,
+  });
+
   const [gameSettings, setGameSettings] = useState({
     shape: "box",
     itemCount: 5,
-    itemCountArr: [...Array(5)],
-    colorList: [],
-    gameColors: [
-      { custom: false, cssColorsIndex: 10, name: "Blue", hex: "#0000FF" },
-      { custom: false, cssColorsIndex: 114, name: "Red", hex: "#FF0000" },
-      { custom: false, cssColorsIndex: 139, name: "Yellow", hex: "#FFFF00" },
-      { custom: false, cssColorsIndex: 99, name: "Orange", hex: "#FFA500" },
-      { custom: false, cssColorsIndex: 51, name: "Green", hex: "#008000" },
-      { custom: false, cssColorsIndex: 112, name: "Purple", hex: "#800080" },
-      { custom: false, cssColorsIndex: 137, name: "White", hex: "#FFFFFF" },
-      { custom: false, cssColorsIndex: 7, name: "Black", hex: "#000000" },
-      { custom: false, cssColorsIndex: 11, name: "Brown", hex: "#A52A2A" },
-      { custom: false, cssColorsIndex: 50, name: "Gray", hex: "#808080" },
-      { custom: false, cssColorsIndex: 2, name: "Aqua", hex: "#00FFFF" },
-    ],
+    gameColors: {
+      0: {
+        customName: false,
+        name: "Blue",
+        hex: "#0000FF",
+      },
+      1: { customName: false, name: "Red", hex: "#FF0000" },
+      2: { customName: false, name: "Yellow", hex: "#FFFF00" },
+      3: { customName: false, name: "Orange", hex: "#FFA500" },
+      4: { customName: false, name: "Green", hex: "#008000" },
+    },
     boxRows: 3,
     showItemIndex: true,
     showColorName: true,
+    showHex: true,
   });
 
   //   const [deviceSettings, setDeviceSettings] = useState({
@@ -191,19 +194,32 @@ const Game = () => {
 
   const [boxBoard, setBoxBoard] = useState([]);
 
-  function getUniqueColor() {
-    const randomCssColor =
-      cssColors[Math.floor(Math.random() * cssColors.length)];
+  function getUniqueColor(colorList, itemCount) {
+    if (itemCount >= cssColors.length) {
+      const randHex = `#${Math.floor(Math.random() * 16777215).toString(
+        16
+      )}`.toUpperCase();
+      if (
+        Object.values(colorList).some((colorObj) => colorObj.hex === randHex)
+      ) {
+        return getUniqueColor(colorList, itemCount);
+      }
 
-    if (
-      gameSettings.gameColors.find(
-        (gameColor) => gameColor.hex === randomCssColor.hex
-      )
-    ) {
-      return getUniqueColor();
+      return { customName: false, name: `Hex ${randHex}`, hex: randHex };
+    } else {
+      const randIndex = Math.floor(Math.random() * cssColors.length);
+      const randomCssColor = cssColors[randIndex];
+
+      if (
+        Object.values(colorList).some(
+          (colorObj) => colorObj.hex === randomCssColor.hex
+        )
+      ) {
+        return getUniqueColor(colorList);
+      }
+
+      return { customName: false, ...randomCssColor };
     }
-
-    return randomCssColor;
   }
   // device orientation
   //   useEffect(() => {
@@ -224,108 +240,222 @@ const Game = () => {
   //     );
   //   }, []);
 
-  // box game board shape and colors
+  // --------------
+  //   useEffect(() => {
+  //     // creating copy of color list array
+  //     let colorList = { ...gameSettings.gameColors };
+  //     console.log(colorList);
+
+  //     // adding new colors if value increases as needed. Keeping old values to retain colors that may have already been accepted or changed by user
+
+  //     for (
+  //       let i = Object.keys(colorList).length;
+  //       i < gameSettings.itemCount;
+  //       i++
+  //     ) {
+  //       colorList = {
+  //         ...colorList,
+  //         [i]: getUniqueColor(colorList, gameSettings.itemCount),
+  //       };
+  //     }
+
+  //     // setGameSettings({
+  //     //   ...gameSettings,
+  //     //   gameColors: colorList,
+  //     // });
+
+  //     console.log(colorList);
+  //     setGameSettings((prevSettings) => ({
+  //       ...prevSettings,
+  //       gameColors: colorList,
+  //     }));
+  //   }, [gameSettings.itemCount, setGameSettings]);
+
   useEffect(() => {
-    const boxBoard = [];
-    let boxRow = [];
+    const generateBoxBoard = () => {
+      const boxBoard = [];
+      let boxRow = [];
 
-    // creating copy of color list array
-    let colorList = [...gameSettings.gameColors];
-
-    // adding new colors if value increases as needed. Keeping old values to retain colors that may have already been accepted or changed by user
-    for (
-      let i = 0;
-      i < gameSettings.itemCount - gameSettings.gameColors.length;
-      i++
-    ) {
-      colorList.push(getUniqueColor());
-    }
-
-    // createing a box element for each item color in game.
-    for (let j = 0; j < gameSettings.itemCount; j++) {
-      boxRow.push(
-        <Col key={j} className="d-flex justify-content-center">
-          <BoxElement
-            id={`gamebox-${colorList[j].hex.replace("#", "")}`}
-            // itemIndex={gameSettings.showItemIndex ? j : ""}
-            colorName={gameSettings.showColorName ? colorList[j].name : ""}
-            color={colorList[j].hex}
-          />
-        </Col>
-      );
-
-      //   to create a square-ish shape, adding a row after each group of boxes match the row count. (determined by the form handleChange function)
-      if (
-        (j + 1) % gameSettings.boxRows === 0 ||
-        j === gameSettings.itemCount - 1
-      ) {
-        boxBoard.push(
-          <Row
-            key={`row-${((j + 1) / gameSettings.boxRows).toFixed(1)}`}
-            className="d-flex justify-content-center flex-wrap g-2 row-cols-auto mb-2"
-          >
-            {boxRow}
-          </Row>
+      console.log(gameSettings.gameColors);
+      // createing a box element for each item color in game.
+      for (let j = 0; j < gameSettings.itemCount; j++) {
+        console.log(gameSettings.gameColors);
+        boxRow.push(
+          <Col key={j} className="d-flex justify-content-center">
+            <BoxElement
+              id={`gamebox-${gameSettings.gameColors[j].hex.replace("#", "")}`}
+              boxnum={j}
+              updateColor={handleColorChange}
+              // itemIndex={gameSettings.showItemIndex ? j : ""}
+              colorName={
+                gameSettings.showColorName
+                  ? gameSettings.gameColors[j].name
+                  : ""
+              }
+              color={gameSettings.gameColors[j].hex}
+              gameColor={gameSettings.gameColors[j]}
+            />
+          </Col>
         );
-        boxRow = [];
+
+        //   to create a square-ish shape, adding a row after each group of boxes match the row count. (determined by the form handleChange function)
+        if (
+          (j + 1) % gameSettings.boxRows === 0 ||
+          j === gameSettings.itemCount - 1
+        ) {
+          boxBoard.push(
+            <Row
+              key={`row-${((j + 1) / gameSettings.boxRows).toFixed(1)}`}
+              className="d-flex justify-content-center flex-wrap g-2 row-cols-auto mb-2"
+            >
+              {boxRow}
+            </Row>
+          );
+          boxRow = [];
+        }
       }
-    }
 
-    // setting states
-    setBoxBoard(boxBoard);
-    setGameSettings({
-      ...gameSettings,
-      gameColors: colorList,
-    });
-  }, [gameSettings.itemCount, gameSettings.itemCount]);
+      setBoxBoard(boxBoard);
+    };
 
-  console.log(gameSettings);
+    generateBoxBoard();
+  }, [gameSettings.itemCount, gameSettings.boxRows, gameSettings.gameColors]);
+
+  // --------------
+
+  // box game board shape and colors
+  //   useEffect(() => {
+  //     const boxBoard = [];
+  //     let boxRow = [];
+
+  //     // creating copy of color list array
+  //     let colorList = { ...gameSettings.gameColors };
+  //     console.log(colorList);
+
+  //     // adding new colors if value increases as needed. Keeping old values to retain colors that may have already been accepted or changed by user
+
+  //     for (
+  //       let i = Object.keys(colorList).length;
+  //       i < gameSettings.itemCount;
+  //       i++
+  //     ) {
+  //       colorList = {
+  //         ...colorList,
+  //         [i]: getUniqueColor(colorList, gameSettings.itemCount),
+  //       };
+  //       //   colorList.push(getUniqueColor(colorList));
+  //     }
+
+  //     // createing a box element for each item color in game.
+  //     for (let j = 0; j < gameSettings.itemCount; j++) {
+  //       boxRow.push(
+  //         <Col key={j} className="d-flex justify-content-center">
+  //           <BoxElement
+  //             id={`gamebox-${colorList[j].hex.replace("#", "")}`}
+  //             boxnum={j}
+  //             updateColor={handleColorChange}
+  //             // itemIndex={gameSettings.showItemIndex ? j : ""}
+  //             colorName={gameSettings.showColorName ? colorList[j].name : ""}
+  //             color={colorList[j].hex}
+  //             gameColor={colorList[j]}
+  //           />
+  //         </Col>
+  //       );
+
+  //       //   to create a square-ish shape, adding a row after each group of boxes match the row count. (determined by the form handleChange function)
+  //       if (
+  //         (j + 1) % gameSettings.boxRows === 0 ||
+  //         j === gameSettings.itemCount - 1
+  //       ) {
+  //         boxBoard.push(
+  //           <Row
+  //             key={`row-${((j + 1) / gameSettings.boxRows).toFixed(1)}`}
+  //             className="d-flex justify-content-center flex-wrap g-2 row-cols-auto mb-2"
+  //           >
+  //             {boxRow}
+  //           </Row>
+  //         );
+  //         boxRow = [];
+  //       }
+  //     }
+
+  //     // setting states
+  //     setBoxBoard(boxBoard);
+  //     setGameSettings({
+  //       ...gameSettings,
+  //       gameColors: colorList,
+  //     });
+  //   }, [gameSettings.shape, gameSettings.itemCount, setGameSettings]);
 
   //  --- Form Handlers
   const handleDropdown = (e1) => {
     setGameSettings({ ...gameSettings, shape: e1 });
   };
 
-  const handleChange = (e1, e2, e3) => {
-    // console.log("e1", e1);
-    // e2 && console.log("e2", e2);
-    // e3 && console.log("e3", e3);
+  const handleSwitch = (e1, e2, e3) => {
+    console.log("switch", e1.target.checked);
+    console.log("switch", e1.target.name);
+    e2 && console.log("switch", e2.target);
+    e3 && console.log("switch", e3.target);
 
-    // let colorList = [...gameSettings.gameColors];
+    setGameSettings({ ...gameSettings, [e1.target.name]: e1.target.checked });
+  };
 
-    // if (colorList.length < e1.target.value) {
-    //   for (let i = 0; i < e1.target.value - colorList.length; i++) {
-    //     colorList.push(getUniqueColor());
-    //   }
-    // }
+  const handleChange = (e1) => {
+    setFormValues({
+      ...formValues,
+      itemCount: e1.target.value,
+    });
 
-    const rows = Math.ceil(Math.sqrt(Number(e1.target.value)));
-    e1 && console.log("rows", rows);
+    if (
+      e1.target.value < formValues.minItems ||
+      e1.target.value > formValues.maxItems
+    ) {
+      return;
+    } else {
+      let colorList = { ...gameSettings.gameColors };
+      console.log(colorList);
+
+      // adding new colors if value increases as needed. Keeping old values to retain colors that may have already been accepted or changed by user
+
+      for (let i = Object.keys(colorList).length; i < e1.target.value; i++) {
+        colorList = {
+          ...colorList,
+          [i]: getUniqueColor(colorList, e1.target.value),
+        };
+      }
+
+      // setGameSettings({
+      //   ...gameSettings,
+      //   gameColors: colorList,
+      // });
+
+      const rows = Math.ceil(Math.sqrt(Number(e1.target.value)));
+      e1 && console.log("rows", rows);
+
+      setGameSettings({
+        ...gameSettings,
+        itemCount: e1.target.value,
+        boxRows: rows,
+        gameColors: colorList,
+        //   cssColorIndexList: colorList,
+      });
+    }
+  };
+
+  const handleColorChange = (boxnum, colorObj) => {
+    console.log(boxnum);
+    console.log(colorObj);
+    // let updateList = {...gameSettings.gameColors};
+    // updateList.splice(boxnum, 1, colorObj);
 
     setGameSettings({
       ...gameSettings,
-      itemCount: e1.target.value,
-      boxRows: rows,
-      //   cssColorIndexList: colorList,
+      gameColors: { ...gameSettings.gameColors, [boxnum]: colorObj },
     });
   };
 
-  const handleColorChange = (e1, e2) => {
-    console.log(e1.target.value);
-    console.dir(e1.target.dataset.index);
-    console.dir(e1.target);
-
-    let newColors = [...gameSettings.gameColors];
-    newColors.splice(e1.target.dataset.index, 1, {
-      ...gameSettings.gameColors[e1.target.dataset.index],
-      custom: true,
-      name: `Custom ${e1.target.dataset.index}`,
-      hex: e1.target.value,
-    });
-
-    setGameSettings({ ...gameSettings, gameColors: newColors });
-  };
-
+  console.log("gameSettings", gameSettings);
   return (
     <>
       {/* testing area */}
@@ -379,42 +509,62 @@ const Game = () => {
                   <Dropdown.Item eventKey="circle">Circle</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
-              <InputGroup variant="secondary" size="sm" className="mb-2">
+              <InputGroup
+                variant="secondary"
+                size="sm"
+                className="mb-2 position-relative"
+                hasValidation
+              >
                 <Button variant="secondary" className="pe-none">
                   # of items
                 </Button>
                 <Form.Control
                   aria-label="number-of-items"
                   aria-describedby="number-of-items-to-memorize"
-                  value={gameSettings.itemCount}
+                  value={formValues.itemCount}
                   onChange={handleChange}
+                  name="itemCount"
+                  isInvalid={
+                    formValues.itemCount < formValues.minItems ||
+                    formValues.itemCount > formValues.maxItems
+                  }
                 />
+                <Form.Control.Feedback type="invalid" tooltip>
+                  {`Must be between ${formValues.minItems} and ${formValues.maxItems}`}
+                </Form.Control.Feedback>
                 <Form.Range
                   onChange={handleChange}
-                  value={gameSettings.itemCount}
+                  value={formValues.itemCount}
+                  name="itemCountRange"
+                  min={formValues.minItems}
+                  max={formValues.maxItems}
                 />
-                {/* needs useEffect since state is not set immediately */}
-                {/* {Array.from(
-                  { length: gameSettings.itemCount },
-                  (_, itemIndex) => (
-                    <Form.Control
-                      key={`color-${itemIndex}`}
-                      data-index={itemIndex}
-                      style={{
-                        height: "2rem",
-                        width: "2.5rem",
-                        paddingLeft: ".5rem",
-                        paddingRight: ".5rem",
-                      }}
-                      className="flex-grow-0"
-                      type="color"
-                      value={gameSettings.gameColors[itemIndex].hex}
-                      title={`Color ${itemIndex}`}
-                      onChange={handleColorChange}
-                    />
-                  )
-                )} */}
               </InputGroup>
+              <div>Show:</div>
+              <Form.Check
+                id="switch-num"
+                inline
+                label="Number"
+                name="showNum"
+                type="switch"
+                onChange={handleSwitch}
+              />
+              <Form.Check
+                id="switch-name"
+                inline
+                label="Name"
+                name="showName"
+                type="switch"
+                onChange={handleSwitch}
+              />
+              <Form.Check
+                id="switch-hex"
+                inline
+                label="Hex"
+                name="showHex"
+                type="switch"
+                onChange={handleSwitch}
+              />
               <InputGroup size="sm" className="mb-2">
                 <Button variant="secondary" className="pe-none">
                   # of items
