@@ -14,10 +14,10 @@ import { motion } from "framer-motion";
 
 const BoxElement = ({
   id,
-  showColorName = false,
+  showName = false,
   showHex = false,
-  showBoxNum = false,
-  boxnum = "",
+  showNum = false,
+  colorNum = "",
   gameColor = { customName: false, name: "", hex: "" },
   gameInProgress = false,
   updateColor,
@@ -52,10 +52,10 @@ const BoxElement = ({
   // handleFormChange
   const handleColorBlur = (e1) => {
     if (editColor.hex !== gameColor.hex) {
-      updateColor(e1.target.dataset.boxnum, {
+      updateColor(e1.target.dataset.colornum, {
         customName: true,
         name: !editColor.customName
-          ? `Custom ${e1.target.dataset.boxnum}`
+          ? `Custom ${e1.target.dataset.colornum}`
           : editColor.customName,
         hex: editColor.hex,
       });
@@ -64,7 +64,7 @@ const BoxElement = ({
         ...editColor,
         customName: true,
         name: !editColor.customName
-          ? `Custom ${e1.target.dataset.boxnum}`
+          ? `Custom ${e1.target.dataset.colornum}`
           : editColor.name,
         hex: editColor.hex,
       });
@@ -75,7 +75,7 @@ const BoxElement = ({
 
   const handleNameBlur = (e1) => {
     if (editColor.name !== gameColor.name) {
-      updateColor(e1.target.dataset.boxnum, {
+      updateColor(e1.target.dataset.colornum, {
         customName: true,
         name: editColor.name,
         hex: editColor.hex,
@@ -114,100 +114,118 @@ const BoxElement = ({
       whileTap={gameInProgress ? { scale: 0.9 } : null}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
     >
-      {/* color pallette */}
-      <div
-        style={{
-          position: "absolute",
-          top: ".375em",
-          left: ".375em",
-          fontSize: ".875em",
-        }}
-        className="svg-button"
-      >
-        <PaletteFill
-          style={{
-            pointerEvents: "none",
-          }}
-        />
-        <Form.Control
-          style={{
-            height: "1em",
-            width: "1em",
-            paddingTop: "0rem",
-            paddingBottom: "0rem",
-            paddingLeft: "0rem",
-            paddingRight: "0rem",
-            border: "none",
-            borderRadius: "none",
-            backgroundColor: "transparent",
-          }}
-          title="Edit Color"
-          data-boxnum={boxnum}
-          className="flex-grow-0"
-          type="color"
-          value={editColor.hex}
-          onChange={handleFormChange}
-          onBlur={handleColorBlur}
-          name={"hex"}
-        />
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          top: ".375em",
-          right: ".375em",
-          fontSize: ".875em",
-        }}
-        className="svg-button"
-      >
-        <PencilFill
-          name="edit"
-          style={{
-            transform: "translateX(-100%)",
-          }}
-          onClick={toggleEdit}
-          title="Edit Name"
-        />
-      </div>
-      <div>{boxnum + 1}</div>
-      <div
-        style={{
-          fontSize: ".625em",
-          wordWrap: "break-word",
-          textAlign: "center",
-          left: "-.5em",
-          overflow: "hidden",
-          boxShadow: "inset 0px 0px 0px 1px white",
-        }}
-      >
-        <div
-          style={{
-            wordWrap: "break-word",
-            textAlign: "center",
-            position: "relative",
-            boxShadow: "inset 0px 0px 0px 1px orange",
-          }}
-        >
-          <Form.Control
+      {!gameInProgress ? (
+        <div>
+          {/* color pallette */}
+          <div
             style={{
-              boxShadow: "inset 0px 0px 0px 1px green",
+              position: "absolute",
+              top: ".5em",
+              left: ".5em",
+              fontSize: ".875em",
             }}
-            ref={nameRef}
-            data-boxnum={boxnum}
-            name={`name`}
-            className={`${
-              toggleNameEdit ? "plain-text-input pointer" : "pe-none"
-            }`}
-            plaintext
-            readOnly={!toggleNameEdit}
-            disabled={!toggleNameEdit}
-            onChange={handleFormChange}
-            onBlur={handleNameBlur}
-            value={editColor.name.replace(/([a-z])([A-Z])/g, "$1 $2")}
-          />
+            className="svg-button"
+          >
+            <PaletteFill
+              style={{
+                pointerEvents: "none",
+              }}
+            />
+            <Form.Control
+              style={{
+                height: "1em",
+                width: "1em",
+                paddingTop: "0rem",
+                paddingBottom: "0rem",
+                paddingLeft: "0rem",
+                paddingRight: "0rem",
+                border: "none",
+                borderRadius: "none",
+                backgroundColor: "transparent",
+              }}
+              title="Edit Color"
+              data-colornum={colorNum}
+              className="flex-grow-0"
+              type="color"
+              value={editColor.hex}
+              onChange={handleFormChange}
+              onBlur={handleColorBlur}
+              name={"hex"}
+            />
+          </div>
+          {showName ? (
+            <div
+              style={{
+                position: "absolute",
+                top: ".5em",
+                right: ".5em",
+                fontSize: ".875em",
+              }}
+              className="svg-button"
+            >
+              <PencilFill
+                name="edit"
+                style={{
+                  transform: "translateX(-100%)",
+                }}
+                onClick={toggleEdit}
+                title="Edit Name"
+              />
+            </div>
+          ) : null}
+
+          <div
+            style={{
+              wordWrap: "break-word",
+              textAlign: "center",
+              overflow: "hidden",
+              boxShadow: "inset 0px 0px 0px 1px white",
+            }}
+          >
+            {showNum ? <div>{colorNum + 1}</div> : null}
+            {showName ? (
+              <div
+                style={{
+                  fontSize: ".625em",
+                  wordWrap: "break-word",
+                  textAlign: "center",
+                  boxShadow: "inset 0px 0px 0px 1px orange",
+                }}
+              >
+                <Form.Control
+                  style={{
+                    boxShadow: "inset 0px 0px 0px 1px green",
+                  }}
+                  ref={nameRef}
+                  data-colornum={colorNum}
+                  name={`name`}
+                  className={`${
+                    toggleNameEdit ? "plain-text-input pointer" : "pe-none"
+                  }`}
+                  plaintext
+                  readOnly={!toggleNameEdit}
+                  disabled={!toggleNameEdit}
+                  onChange={handleFormChange}
+                  onBlur={handleNameBlur}
+                  value={editColor.name.replace(/([a-z])([A-Z])/g, "$1 $2")}
+                />
+              </div>
+            ) : null}
+            {showHex ? (
+              <div
+                style={{
+                  fontSize: ".625em",
+                  wordWrap: "break-word",
+                  textAlign: "center",
+                  boxShadow: "inset 0px 0px 0px 1px orange",
+                }}
+              >
+                {editColor.hex}
+              </div>
+            ) : null}
+          </div>
         </div>
-        <div>{editColor.hex}</div>
-      </div>
+      ) : null}
     </motion.div>
   );
 };
