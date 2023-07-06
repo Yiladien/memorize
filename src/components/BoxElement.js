@@ -93,7 +93,7 @@ const BoxElement = ({
   };
 
   return (
-    <motion.div
+    <div
       id={id}
       style={{
         background: editColor.hex,
@@ -107,12 +107,12 @@ const BoxElement = ({
         paddingRight: ".5em",
         color: "black",
         position: "relative",
-        boxShadow: "inset 0px 0px 0px 1px white",
+        // boxShadow: "inset 0px 0px 0px 1px white",
       }}
       className="box-element font-monospace"
-      whileHover={gameInProgress ? { scale: 1.2 } : null}
-      whileTap={gameInProgress ? { scale: 0.9 } : null}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      //   whileHover={gameInProgress ? { scale: 1.2 } : null}
+      //   whileTap={gameInProgress ? { scale: 0.9 } : null}
+      //   transition={{ type: "spring", stiffness: 400, damping: 25 }}
     >
       {!gameInProgress ? (
         <div>
@@ -179,7 +179,7 @@ const BoxElement = ({
               wordWrap: "break-word",
               textAlign: "center",
               overflow: "hidden",
-              boxShadow: "inset 0px 0px 0px 1px white",
+              // boxShadow: "inset 0px 0px 0px 1px white",
             }}
           >
             {showNum ? <div>{colorNum + 1}</div> : null}
@@ -189,13 +189,15 @@ const BoxElement = ({
                   fontSize: ".625em",
                   wordWrap: "break-word",
                   textAlign: "center",
-                  boxShadow: "inset 0px 0px 0px 1px orange",
+                  // boxShadow: "inset 0px 0px 0px 1px orange",
                 }}
               >
                 <Form.Control
-                  style={{
-                    boxShadow: "inset 0px 0px 0px 1px green",
-                  }}
+                  style={
+                    {
+                      // boxShadow: "inset 0px 0px 0px 1px green",
+                    }
+                  }
                   ref={nameRef}
                   data-colornum={colorNum}
                   name={`name`}
@@ -217,7 +219,7 @@ const BoxElement = ({
                   fontSize: ".625em",
                   wordWrap: "break-word",
                   textAlign: "center",
-                  boxShadow: "inset 0px 0px 0px 1px orange",
+                  // boxShadow: "inset 0px 0px 0px 1px orange",
                 }}
               >
                 {editColor.hex}
@@ -226,7 +228,7 @@ const BoxElement = ({
           </div>
         </div>
       ) : null}
-    </motion.div>
+    </div>
   );
 };
 

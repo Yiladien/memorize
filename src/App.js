@@ -9,14 +9,25 @@ import EndGameModal from "./components/EndGameModal";
 function App() {
   const [modalShow, setModalShow] = useState(false);
 
-  const showScore = () => {
-    console.log("showScore");
+  const [endGameData, setEndGameData] = useState({
+    score: 0,
+    rounds: 0,
+  });
+
+  const showScore = (gameData) => {
+    console.log("showScore", gameData);
+    setModalShow(true);
   };
 
   return (
     <div className="text-white bg-dark min-vh-100" data-bs-theme="dark">
-      <Game />
-      <EndGameModal show={modalShow} onHide={() => setModalShow(false)} />
+      <Game showScore={showScore} />
+      <EndGameModal
+        show={modalShow}
+        score={endGameData.score}
+        rounds={endGameData.rounds}
+        onHide={() => setModalShow(false)}
+      />
     </div>
   );
 }

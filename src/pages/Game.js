@@ -15,7 +15,28 @@ import BoxElement from "../components/BoxElement";
 
 // import { InfoCircleFill } from "react-bootstrap-icons";
 
-// import { motion, useAnimate, useInView, stagger } from "framer-motion";
+import { motion } from "framer-motion";
+
+const boardAnimateContainer = {
+  hidden: { opacity: 1, scale: 0 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      delayChildren: 0.3,
+      staggerChildren: 0.1,
+      duration: 0.5,
+    },
+  },
+};
+
+const boxAnimate = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+  },
+};
 
 const cssColors = [
   { name: "AliceBlue", hex: "#F0F8FF" },
@@ -161,14 +182,15 @@ const cssColors = [
   { name: "YellowGreen", hex: "#9ACD32" },
 ];
 
-const Game = () => {
+const Game = ({ showScore }) => {
   const [formValues, setFormValues] = useState({
     minItems: 1,
     maxItems: 100,
     itemCount: 5,
     minAnswerTime: 1,
     maxAnswerTime: 30,
-    answerTime: 15,
+    answerTime: 5,
+    // answerTime: 15,
   });
 
   const [gameSettings, setGameSettings] = useState({
@@ -189,7 +211,7 @@ const Game = () => {
     boxRows: 3,
     showItemIndex: true,
     showColorName: true,
-    showNum: true,
+    showNum: false,
     showName: false,
     showHex: false,
     answerTimer: false,
@@ -260,7 +282,7 @@ const Game = () => {
   // boxBoard
   useEffect(() => {
     const generateBoxBoard = () => {
-      const boxBoard = [];
+      let boxBoard = [];
       let boxRow = [];
 
       console.log(gameSettings.gameColors);
@@ -269,23 +291,29 @@ const Game = () => {
         console.log(gameSettings.gameColors);
         boxRow.push(
           <Col key={j} className="d-flex justify-content-center">
-            <BoxElement
-              id={`gamebox-${gameSettings.gameColors[j].hex.replace("#", "")}`}
-              colornum={j}
-              updateColor={handleColorChange}
-              // itemIndex={gameSettings.showItemIndex ? j : ""}
-              colorName={
-                gameSettings.showColorName
-                  ? gameSettings.gameColors[j].name
-                  : ""
-              }
-              color={gameSettings.gameColors[j].hex}
-              gameColor={gameSettings.gameColors[j]}
-              showNum={gameSettings.showNum}
-              showHex={gameSettings.showHex}
-              showName={gameSettings.showName}
-              gameInProgress={gameSettings.gameInProgress}
-            />
+            <motion.div variants={boxAnimate}>
+              {/* <motion.div variants={boxAnimate}> */}
+              <BoxElement
+                id={`gamebox-${gameSettings.gameColors[j].hex.replace(
+                  "#",
+                  ""
+                )}`}
+                colorNum={j}
+                updateColor={handleColorChange}
+                // itemIndex={gameSettings.showItemIndex ? j : ""}
+                colorName={
+                  gameSettings.showColorName
+                    ? gameSettings.gameColors[j].name
+                    : ""
+                }
+                color={gameSettings.gameColors[j].hex}
+                gameColor={gameSettings.gameColors[j]}
+                showNum={gameSettings.showNum}
+                showHex={gameSettings.showHex}
+                showName={gameSettings.showName}
+                gameInProgress={gameSettings.gameInProgress}
+              />
+            </motion.div>
           </Col>
         );
 
@@ -306,13 +334,23 @@ const Game = () => {
         }
       }
 
+      boxBoard = (
+        <motion.div
+          variants={boardAnimateContainer}
+          initial="hidden"
+          animate="visible"
+        >
+          {boxBoard}
+        </motion.div>
+      );
+
       setBoxBoard(boxBoard);
     };
 
     generateBoxBoard();
   }, [
     gameSettings.gameInProgress,
-    gameSettings.itemCount,
+    // gameSettings.itemCount,
     gameSettings.boxRows,
     gameSettings.gameColors,
     gameSettings.showNum,
@@ -327,9 +365,12 @@ const Game = () => {
       interval = setInterval(() => {
         setGameData({ ...gameData, timer: gameData.timer - 1 });
       }, 1000);
-    } else if (gameData.timer === 0) {
-      //   setModalOpen(true);
+    } else if (
+      (gameSettings.gameInProgress && gameData.timer === 0) ||
+      gameData.attemptsMade === gameData.attemptLimit
+    ) {
       clearInterval(interval);
+      handleGameEnd();
     }
 
     return () => clearInterval(interval);
@@ -363,6 +404,7 @@ const Game = () => {
       return;
     } else {
       if (e1.target.name === "itemCount") {
+        console.log("getting new color", e1.target.value);
         let colorList = { ...gameSettings.gameColors };
         console.log(colorList);
 
@@ -374,6 +416,7 @@ const Game = () => {
             [i]: getUniqueColor(colorList, e1.target.value),
           };
         }
+        console.log(colorList);
 
         const rows = Math.ceil(Math.sqrt(Number(e1.target.value)));
         e1 && console.log("rows", rows);
@@ -384,12 +427,12 @@ const Game = () => {
           boxRows: rows,
           gameColors: colorList,
         });
+      } else {
+        setGameSettings({
+          ...gameSettings,
+          [e1.target.name]: e1.target.value,
+        });
       }
-
-      setGameSettings({
-        ...gameSettings,
-        [e1.target.name]: e1.target.value,
-      });
     }
   };
 
@@ -415,6 +458,12 @@ const Game = () => {
       userSequence: [],
     });
     setGameSettings({ ...gameSettings, gameInProgress: true });
+  };
+
+  const handleGameEnd = () => {
+    console.log("handleGameEnd");
+    setGameSettings({ ...gameSettings, gameInProgress: false });
+    showScore(gameData);
   };
 
   console.log("gameSettings", gameSettings);
@@ -456,7 +505,7 @@ const Game = () => {
               <Accordion.Body>
                 <Dropdown
                   data-bs-theme="dark"
-                  className="mb-2"
+                  className="mb-2 pb-2"
                   onSelect={handleDropdown}
                 >
                   <Dropdown.Toggle
@@ -472,10 +521,14 @@ const Game = () => {
                     <Dropdown.Item eventKey="circle">Circle</Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
+
+                <Form.Label className="me-2 w-100">
+                  How many to Memorize:
+                </Form.Label>
                 <InputGroup
                   variant="secondary"
                   size="sm"
-                  className="mb-2 position-relative"
+                  className="mb-2 position-relative border-bottom"
                   hasValidation
                 >
                   <Button variant="secondary" className="pe-none">
@@ -509,7 +562,7 @@ const Game = () => {
                     max={formValues.maxItems}
                   />
                 </InputGroup>
-                <Form.Group className="mb-2">
+                <Form.Group className="mb-2 border-bottom">
                   <Form.Label className="me-2 w-100">Display:</Form.Label>
                   <Form.Check
                     id="switch-num"
@@ -518,7 +571,7 @@ const Game = () => {
                     name="showNum"
                     type="switch"
                     onChange={handleSwitch}
-                    checked={gameSettings.showNum ? "checked" : null}
+                    checked={gameSettings.showNum}
                   />
                   <Form.Check
                     id="switch-name"
@@ -527,7 +580,7 @@ const Game = () => {
                     name="showName"
                     type="switch"
                     onChange={handleSwitch}
-                    checked={gameSettings.showName ? "checked" : null}
+                    checked={gameSettings.showName}
                   />
                   <Form.Check
                     id="switch-hex"
@@ -536,19 +589,19 @@ const Game = () => {
                     name="showHex"
                     type="switch"
                     onChange={handleSwitch}
-                    checked={gameSettings.showHex ? "checked" : null}
+                    checked={gameSettings.showHex}
                   />
                 </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label className="me-2">Time Limit:</Form.Label>
+                <Form.Group className="mb-2 border-bottom">
+                  <Form.Label className="me-2 w-100">Timer:</Form.Label>
                   <Form.Check
                     id="switch-answer-timer"
                     inline
-                    label=""
+                    label="Time Limit"
                     name="answerTimer"
                     type="switch"
                     onChange={handleSwitch}
-                    checked={gameSettings.answerTimer ? "checked" : null}
+                    checked={gameSettings.answerTimer}
                   />
                   {gameSettings.answerTimer ? (
                     <InputGroup
