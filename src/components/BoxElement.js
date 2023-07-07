@@ -2,15 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 
 import Form from "react-bootstrap/Form";
 
-import {
-  Pencil,
-  PencilFill,
-  Palette,
-  PaletteFill,
-  CheckLg,
-} from "react-bootstrap-icons";
-
-import { motion } from "framer-motion";
+import { PencilFill, PaletteFill } from "react-bootstrap-icons";
 
 const BoxElement = ({
   id,
@@ -70,7 +62,9 @@ const BoxElement = ({
       });
     }
 
-    setToggleNameEdit(!toggleNameEdit);
+    if (showName === true) {
+      setToggleNameEdit(!toggleNameEdit);
+    }
   };
 
   const handleNameBlur = (e1) => {

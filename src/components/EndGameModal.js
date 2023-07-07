@@ -3,7 +3,6 @@ import Modal from "react-bootstrap/Modal";
 
 // function EndGameModal({ score, rounds, onHide }) {
 function EndGameModal(props) {
-  console.log(props);
   return (
     <Modal {...props} size="lg" aria-labelledby="game-end-modal" centered>
       <Modal.Header closeButton>

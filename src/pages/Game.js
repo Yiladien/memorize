@@ -1,5 +1,5 @@
 // import React from "react";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 //bootstrap
 import Container from "react-bootstrap/Container";
@@ -17,24 +17,43 @@ import BoxElement from "../components/BoxElement";
 
 import { motion } from "framer-motion";
 
-const boardAnimateContainer = {
-  hidden: { opacity: 1, scale: 0 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      delayChildren: 0.3,
-      staggerChildren: 0.1,
-      duration: 0.5,
+const motionAnimations = {
+  boardAnimateContainer: {
+    hidden: { opacity: 1, scale: 0 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        delayChildren: 0.3,
+        staggerChildren: 0.1,
+        duration: 0.5,
+      },
+    },
+    exit: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        delayChildren: 0.3,
+        staggerChildren: -0.1,
+        duration: 3.5,
+      },
     },
   },
-};
-
-const boxAnimate = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
+  boxAnimate: {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+    },
+    exit: { y: 20, opacity: 1 },
+  },
+  start: {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+    },
+    exit: { y: 20, opacity: 1 },
   },
 };
 
@@ -214,7 +233,7 @@ const Game = ({ showScore }) => {
     showNum: false,
     showName: false,
     showHex: false,
-    answerTimer: false,
+    answerTimer: true,
   });
 
   const [gameData, setGameData] = useState({
@@ -225,6 +244,7 @@ const Game = ({ showScore }) => {
     timer: 0,
     gameSequence: [],
     userSequence: [],
+    animationStep: "visible",
   });
 
   //   const [deviceSettings, setDeviceSettings] = useState({
@@ -291,7 +311,10 @@ const Game = ({ showScore }) => {
         console.log(gameSettings.gameColors);
         boxRow.push(
           <Col key={j} className="d-flex justify-content-center">
-            <motion.div variants={boxAnimate}>
+            <motion.div
+              variants={motionAnimations.boxAnimate}
+              // onAnimationComplete={handleAnimationCompletion}
+            >
               {/* <motion.div variants={boxAnimate}> */}
               <BoxElement
                 id={`gamebox-${gameSettings.gameColors[j].hex.replace(
@@ -334,11 +357,14 @@ const Game = ({ showScore }) => {
         }
       }
 
+      // optional for animation without breaking existing DOM elements
       boxBoard = (
         <motion.div
-          variants={boardAnimateContainer}
+          variants={motionAnimations.boardAnimateContainer}
           initial="hidden"
-          animate="visible"
+          // animate={gameSettings.gameInProgress ? "exit" : "visible"}
+          animate={gameData.animationStep}
+          onAnimationComplete={handleAnimationCompletion}
         >
           {boxBoard}
         </motion.div>
@@ -358,8 +384,13 @@ const Game = ({ showScore }) => {
     gameSettings.showHex,
   ]);
 
+  // timer useEffect
   useEffect(() => {
+    console.log("useEffect-Timer");
     let interval = null;
+
+    console.log("timer", "gameInProgress:", gameSettings.gameInProgress);
+    console.log("timer", "timer:", gameData.timer);
 
     if (gameSettings.gameInProgress && gameData.timer > 0) {
       interval = setInterval(() => {
@@ -449,24 +480,50 @@ const Game = ({ showScore }) => {
   };
 
   const handleGameStart = (e1) => {
-    console.log(e1.target.name);
+    console.log("handleGameStart", e1.target.name);
+    console.log("handleGameStart", "answerTime:", formValues.answerTime);
+
     setGameData({
       rounds: 1,
       attempts: 3,
-      timer: formValues.answerTime,
+      timer: Number(formValues.answerTime),
       gameSequence: [],
       userSequence: [],
+      animationStep: "exit",
     });
     setGameSettings({ ...gameSettings, gameInProgress: true });
   };
 
   const handleGameEnd = () => {
     console.log("handleGameEnd");
-    setGameSettings({ ...gameSettings, gameInProgress: false });
+
     showScore(gameData);
+
+    setGameSettings({ ...gameSettings, gameInProgress: false });
+    setGameData({
+      ...gameData,
+      rounds: 1,
+      attemptLimit: 3,
+      attemptsMade: 0,
+      timeLimit: formValues.answerTime,
+      timer: 0,
+      gameSequence: [],
+      userSequence: [],
+      animationStep: "visible",
+    });
+  };
+
+  const handleAnimationCompletion = (definition) => {
+    console.log("handleAnimationCompletion", definition);
+
+    if (gameSettings.gameInProgress && definition === "exit") {
+      setGameData({ ...gameData, animationStep: "intro" });
+    }
   };
 
   console.log("gameSettings", gameSettings);
+  console.log("gameData", gameData);
+
   return (
     <>
       {/* testing area */}
@@ -657,14 +714,14 @@ const Game = ({ showScore }) => {
                   <Col className="mx-1 mb-1 px-2 text-center text-light border rounded bg-secondary">
                     Round: 1
                   </Col>
-                  <Col className="mx-1 mb-1 px-2  text-center text-light border rounded bg-secondary">
+                  <Col className="mx-1 mb-1 px-2 text-center text-light border rounded bg-secondary">
                     Count: 3
                   </Col>
-                  <Col className="mx-1 mb-1 px-2  text-center text-light border rounded bg-secondary">
+                  <Col className="mx-1 mb-1 px-2 text-center text-light border rounded bg-secondary">
                     Chances: 3
                   </Col>
                   <Col
-                    className="mx-1 mb-1 px-2  text-center text-light border rounded bg-secondary"
+                    className="mx-1 mb-1 px-2 text-center text-light border rounded bg-secondary"
                     xs={12}
                   >
                     Time: {gameData.timer}
