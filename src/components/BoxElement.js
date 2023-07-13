@@ -4,6 +4,25 @@ import Form from "react-bootstrap/Form";
 
 import { PencilFill, PaletteFill } from "react-bootstrap-icons";
 
+function getColorBrightness(hex) {
+  if (hex === "") {
+    return 0;
+  }
+  // Remove the '#' character if present
+  hex = hex.replace("#", "");
+
+  // Convert the hex value to RGB
+  var r = parseInt(hex.substr(0, 2), 16);
+  var g = parseInt(hex.substr(2, 2), 16);
+  var b = parseInt(hex.substr(4, 2), 16);
+
+  // Calculate the brightness using the following formula:
+  // ((r * 299) + (g * 587) + (b * 114)) / 1000
+  var brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+  return brightness;
+}
+
 const BoxElement = ({
   id,
   showName = false,
@@ -19,6 +38,15 @@ const BoxElement = ({
   const [editColor, setEditColor] = useState({ ...gameColor });
 
   const [toggleNameEdit, setToggleNameEdit] = useState(false);
+
+  const [textColor, setTextColor] = useState(getColorBrightness(gameColor.hex));
+
+  useEffect(() => {
+    setTextColor(
+      // 128 is default threshold. 178 seems ok for most colors.
+      getColorBrightness(editColor.hex) > 178 ? "#000000" : "#FFFFFF"
+    );
+  }, [editColor]);
 
   useEffect(() => {
     if (toggleNameEdit) {
@@ -123,6 +151,7 @@ const BoxElement = ({
             <PaletteFill
               style={{
                 pointerEvents: "none",
+                fill: textColor,
               }}
             />
             <Form.Control
@@ -158,9 +187,11 @@ const BoxElement = ({
               className="svg-button"
             >
               <PencilFill
+                id="svg-pencil"
                 name="edit"
                 style={{
-                  transform: "translateX(-100%)",
+                  // transform: "translateX(-100%)",
+                  fill: textColor,
                 }}
                 onClick={toggleEdit}
                 title="Edit Name"
@@ -176,22 +207,29 @@ const BoxElement = ({
               // boxShadow: "inset 0px 0px 0px 1px white",
             }}
           >
-            {showNum ? <div>{colorNum + 1}</div> : null}
+            {showNum ? (
+              <div
+                style={{
+                  color: textColor,
+                }}
+              >
+                {colorNum + 1}
+              </div>
+            ) : null}
             {showName ? (
               <div
                 style={{
                   fontSize: ".625em",
                   wordWrap: "break-word",
                   textAlign: "center",
+                  color: textColor,
                   // boxShadow: "inset 0px 0px 0px 1px orange",
                 }}
               >
                 <Form.Control
-                  style={
-                    {
-                      // boxShadow: "inset 0px 0px 0px 1px green",
-                    }
-                  }
+                  style={{
+                    color: textColor,
+                  }}
                   ref={nameRef}
                   data-colornum={colorNum}
                   name={`name`}
@@ -213,6 +251,7 @@ const BoxElement = ({
                   fontSize: ".625em",
                   wordWrap: "break-word",
                   textAlign: "center",
+                  color: textColor,
                   // boxShadow: "inset 0px 0px 0px 1px orange",
                 }}
               >

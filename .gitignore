@@ -2,6 +2,7 @@ package-lock.json
 .vscode
 .DS_Store
 .eslintrc.js
+Test.js
 
 # folder for related worksheets, notes, non-public
 ignore

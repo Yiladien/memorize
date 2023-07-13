@@ -6,20 +6,27 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Accordion from "react-bootstrap/Accordion";
-import Form from "react-bootstrap/Form";
-import InputGroup from "react-bootstrap/InputGroup";
-import Dropdown from "react-bootstrap/Dropdown";
 import Button from "react-bootstrap/Button";
 
 import BoxElement from "../components/BoxElement";
+import SettingsForm from "../components/SettingsForm";
 
 // import { InfoCircleFill } from "react-bootstrap-icons";
 
 import { motion } from "framer-motion";
+import Collapse from "react-bootstrap/esm/Collapse";
 
 const motionAnimations = {
   boardAnimateContainer: {
-    hidden: { opacity: 1, scale: 0 },
+    hidden: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        delayChildren: 0.3,
+        staggerChildren: -0.1,
+        duration: 0.5,
+      },
+    },
     visible: {
       opacity: 1,
       scale: 1,
@@ -29,177 +36,74 @@ const motionAnimations = {
         duration: 0.5,
       },
     },
-    exit: {
+    intro: {
       opacity: 1,
       scale: 1,
       transition: {
         delayChildren: 0.3,
-        staggerChildren: -0.1,
-        duration: 3.5,
+        staggerChildren: 0.1,
+        duration: 0.5,
       },
     },
   },
   boxAnimate: {
-    hidden: { y: 20, opacity: 0 },
+    hidden: {
+      y: 20,
+      opacity: 0,
+      transition: {
+        duration: 0.2,
+      },
+    },
     visible: {
       y: 0,
       opacity: 1,
     },
-    exit: { y: 20, opacity: 1 },
-  },
-  start: {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
+    intro: {
       y: 0,
       opacity: 1,
     },
-    exit: { y: 20, opacity: 1 },
   },
+  game: {
+    hidden: {
+      y: 20,
+      opacity: 0,
+      transition: {
+        duration: 0.2,
+      },
+    },
+    intro: {
+      y: 0,
+      opacity: 1,
+    },
+    default: {
+      y: 0,
+      opacity: 1,
+    },
+    idle: {
+      y: 0,
+      opacity: 1,
+      filter: "brightness(80%)",
+    },
+    prompted: {
+      y: 0,
+      opacity: 1,
+      filter: "brightness(100%)",
+    },
+    selected: {
+      y: 0,
+      opacity: 1,
+      filter: "brightness(100%)",
+    },
+  },
+  // start: {
+  //   hidden: { y: 20, opacity: 0 },
+  //   visible: {
+  //     y: 0,
+  //     opacity: 1,
+  //   },
+  //   exit: { y: 20, opacity: 1 },
+  // },
 };
-
-const cssColors = [
-  { name: "AliceBlue", hex: "#F0F8FF" },
-  { name: "AntiqueWhite", hex: "#FAEBD7" },
-  { name: "Aqua", hex: "#00FFFF" },
-  { name: "Aquamarine", hex: "#7FFFD4" },
-  { name: "Azure", hex: "#F0FFFF" },
-  { name: "Beige", hex: "#F5F5DC" },
-  { name: "Bisque", hex: "#FFE4C4" },
-  { name: "Black", hex: "#000000" },
-  { name: "BlanchedAlmond", hex: "#FFEBCD" },
-  { name: "Blue", hex: "#0000FF" },
-  { name: "BlueViolet", hex: "#8A2BE2" },
-  { name: "Brown", hex: "#A52A2A" },
-  { name: "BurlyWood", hex: "#DEB887" },
-  { name: "CadetBlue", hex: "#5F9EA0" },
-  { name: "Chartreuse", hex: "#7FFF00" },
-  { name: "Chocolate", hex: "#D2691E" },
-  { name: "Coral", hex: "#FF7F50" },
-  { name: "CornflowerBlue", hex: "#6495ED" },
-  { name: "Cornsilk", hex: "#FFF8DC" },
-  { name: "Crimson", hex: "#DC143C" },
-  { name: "Cyan", hex: "#00FFFF" },
-  { name: "DarkBlue", hex: "#00008B" },
-  { name: "DarkCyan", hex: "#008B8B" },
-  { name: "DarkGoldenRod", hex: "#B8860B" },
-  { name: "DarkGray", hex: "#A9A9A9" },
-  { name: "DarkGreen", hex: "#006400" },
-  { name: "DarkKhaki", hex: "#BDB76B" },
-  { name: "DarkMagenta", hex: "#8B008B" },
-  { name: "DarkOliveGreen", hex: "#556B2F" },
-  { name: "DarkOrange", hex: "#FF8C00" },
-  { name: "DarkOrchid", hex: "#9932CC" },
-  { name: "DarkRed", hex: "#8B0000" },
-  { name: "DarkSalmon", hex: "#E9967A" },
-  { name: "DarkSeaGreen", hex: "#8FBC8F" },
-  { name: "DarkSlateBlue", hex: "#483D8B" },
-  { name: "DarkSlateGray", hex: "#2F4F4F" },
-  { name: "DarkTurquoise", hex: "#00CED1" },
-  { name: "DarkViolet", hex: "#9400D3" },
-  { name: "DeepPink", hex: "#FF1493" },
-  { name: "DeepSkyBlue", hex: "#00BFFF" },
-  { name: "DimGray", hex: "#696969" },
-  { name: "DodgerBlue", hex: "#1E90FF" },
-  { name: "FireBrick", hex: "#B22222" },
-  { name: "FloralWhite", hex: "#FFFAF0" },
-  { name: "ForestGreen", hex: "#228B22" },
-  { name: "Fuchsia", hex: "#FF00FF" },
-  { name: "Gainsboro", hex: "#DCDCDC" },
-  { name: "GhostWhite", hex: "#F8F8FF" },
-  { name: "Gold", hex: "#FFD700" },
-  { name: "GoldenRod", hex: "#DAA520" },
-  { name: "Gray", hex: "#808080" },
-  { name: "Green", hex: "#008000" },
-  { name: "GreenYellow", hex: "#ADFF2F" },
-  { name: "HoneyDew", hex: "#F0FFF0" },
-  { name: "HotPink", hex: "#FF69B4" },
-  { name: "IndianRed", hex: "#CD5C5C" },
-  { name: "Indigo", hex: "#4B0082" },
-  { name: "Ivory", hex: "#FFFFF0" },
-  { name: "Khaki", hex: "#F0E68C" },
-  { name: "Lavender", hex: "#E6E6FA" },
-  { name: "LavenderBlush", hex: "#FFF0F5" },
-  { name: "LawnGreen", hex: "#7CFC00" },
-  { name: "LemonChiffon", hex: "#FFFACD" },
-  { name: "LightBlue", hex: "#ADD8E6" },
-  { name: "LightCoral", hex: "#F08080" },
-  { name: "LightCyan", hex: "#E0FFFF" },
-  { name: "LightGoldenRodYellow", hex: "#FAFAD2" },
-  { name: "LightGray", hex: "#D3D3D3" },
-  { name: "LightGreen", hex: "#90EE90" },
-  { name: "LightPink", hex: "#FFB6C1" },
-  { name: "LightSalmon", hex: "#FFA07A" },
-  { name: "LightSeaGreen", hex: "#20B2AA" },
-  { name: "LightSkyBlue", hex: "#87CEFA" },
-  { name: "LightSlateGray", hex: "#778899" },
-  { name: "LightSteelBlue", hex: "#B0C4DE" },
-  { name: "LightYellow", hex: "#FFFFE0" },
-  { name: "Lime", hex: "#00FF00" },
-  { name: "LimeGreen", hex: "#32CD32" },
-  { name: "Linen", hex: "#FAF0E6" },
-  { name: "Magenta", hex: "#FF00FF" },
-  { name: "Maroon", hex: "#800000" },
-  { name: "MediumAquaMarine", hex: "#66CDAA" },
-  { name: "MediumBlue", hex: "#0000CD" },
-  { name: "MediumOrchid", hex: "#BA55D3" },
-  { name: "MediumPurple", hex: "#9370DB" },
-  { name: "MediumSeaGreen", hex: "#3CB371" },
-  { name: "MediumSlateBlue", hex: "#7B68EE" },
-  { name: "MediumSpringGreen", hex: "#00FA9A" },
-  { name: "MediumTurquoise", hex: "#48D1CC" },
-  { name: "MediumVioletRed", hex: "#C71585" },
-  { name: "MidnightBlue", hex: "#191970" },
-  { name: "MintCream", hex: "#F5FFFA" },
-  { name: "MistyRose", hex: "#FFE4E1" },
-  { name: "Moccasin", hex: "#FFE4B5" },
-  { name: "NavajoWhite", hex: "#FFDEAD" },
-  { name: "Navy", hex: "#000080" },
-  { name: "OldLace", hex: "#FDF5E6" },
-  { name: "Olive", hex: "#808000" },
-  { name: "OliveDrab", hex: "#6B8E23" },
-  { name: "Orange", hex: "#FFA500" },
-  { name: "OrangeRed", hex: "#FF4500" },
-  { name: "Orchid", hex: "#DA70D6" },
-  { name: "PaleGoldenRod", hex: "#EEE8AA" },
-  { name: "PaleGreen", hex: "#98FB98" },
-  { name: "PaleTurquoise", hex: "#AFEEEE" },
-  { name: "PaleVioletRed", hex: "#DB7093" },
-  { name: "PapayaWhip", hex: "#FFEFD5" },
-  { name: "PeachPuff", hex: "#FFDAB9" },
-  { name: "Peru", hex: "#CD853F" },
-  { name: "Pink", hex: "#FFC0CB" },
-  { name: "Plum", hex: "#DDA0DD" },
-  { name: "PowderBlue", hex: "#B0E0E6" },
-  { name: "Purple", hex: "#800080" },
-  { name: "RebeccaPurple", hex: "#663399" },
-  { name: "Red", hex: "#FF0000" },
-  { name: "RosyBrown", hex: "#BC8F8F" },
-  { name: "RoyalBlue", hex: "#4169E1" },
-  { name: "SaddleBrown", hex: "#8B4513" },
-  { name: "Salmon", hex: "#FA8072" },
-  { name: "SandyBrown", hex: "#F4A460" },
-  { name: "SeaGreen", hex: "#2E8B57" },
-  { name: "SeaShell", hex: "#FFF5EE" },
-  { name: "Sienna", hex: "#A0522D" },
-  { name: "Silver", hex: "#C0C0C0" },
-  { name: "SkyBlue", hex: "#87CEEB" },
-  { name: "SlateBlue", hex: "#6A5ACD" },
-  { name: "SlateGray", hex: "#708090" },
-  { name: "Snow", hex: "#FFFAFA" },
-  { name: "SpringGreen", hex: "#00FF7F" },
-  { name: "SteelBlue", hex: "#4682B4" },
-  { name: "Tan", hex: "#D2B48C" },
-  { name: "Teal", hex: "#008080" },
-  { name: "Thistle", hex: "#D8BFD8" },
-  { name: "Tomato", hex: "#FF6347" },
-  { name: "Turquoise", hex: "#40E0D0" },
-  { name: "Violet", hex: "#EE82EE" },
-  { name: "Wheat", hex: "#F5DEB3" },
-  { name: "White", hex: "#FFFFFF" },
-  { name: "WhiteSmoke", hex: "#F5F5F5" },
-  { name: "Yellow", hex: "#FFFF00" },
-  { name: "YellowGreen", hex: "#9ACD32" },
-];
 
 const Game = ({ showScore }) => {
   const [formValues, setFormValues] = useState({
@@ -215,6 +119,8 @@ const Game = ({ showScore }) => {
   const [gameSettings, setGameSettings] = useState({
     gameInProgress: false,
     shape: "box",
+    minItems: 1,
+    maxItems: 100,
     itemCount: 5,
     gameColors: {
       0: {
@@ -234,6 +140,9 @@ const Game = ({ showScore }) => {
     showName: false,
     showHex: false,
     answerTimer: true,
+    minAnswerTime: 1,
+    maxAnswerTime: 30,
+    answerTime: 5,
   });
 
   const [gameData, setGameData] = useState({
@@ -245,6 +154,7 @@ const Game = ({ showScore }) => {
     gameSequence: [],
     userSequence: [],
     animationStep: "visible",
+    animationItemStep: "default",
   });
 
   //   const [deviceSettings, setDeviceSettings] = useState({
@@ -253,32 +163,12 @@ const Game = ({ showScore }) => {
 
   const [boxBoard, setBoxBoard] = useState([]);
 
-  function getUniqueColor(colorList, itemCount) {
-    if (itemCount >= cssColors.length) {
-      const randHex = `#${Math.floor(Math.random() * 16777215).toString(
-        16
-      )}`.toUpperCase();
-      if (
-        Object.values(colorList).some((colorObj) => colorObj.hex === randHex)
-      ) {
-        return getUniqueColor(colorList, itemCount);
-      }
+  function updateGameSettings(formSettings) {
+    setGameSettings({ ...formSettings });
+  }
 
-      return { customName: false, name: `Hex ${randHex}`, hex: randHex };
-    } else {
-      const randIndex = Math.floor(Math.random() * cssColors.length);
-      const randomCssColor = cssColors[randIndex];
-
-      if (
-        Object.values(colorList).some(
-          (colorObj) => colorObj.hex === randomCssColor.hex
-        )
-      ) {
-        return getUniqueColor(colorList);
-      }
-
-      return { customName: false, ...randomCssColor };
-    }
+  function getNextSequence() {
+    return Math.floor(Math.random() * gameSettings.itemCount);
   }
   // device orientation
   //   useEffect(() => {
@@ -301,41 +191,50 @@ const Game = ({ showScore }) => {
 
   // boxBoard
   useEffect(() => {
+    console.log("useEffect-boxBoard", gameSettings);
     const generateBoxBoard = () => {
       let boxBoard = [];
       let boxRow = [];
 
-      console.log(gameSettings.gameColors);
       // createing a box element for each item color in game.
       for (let j = 0; j < gameSettings.itemCount; j++) {
-        console.log(gameSettings.gameColors);
+        gameSettings.gameColors[j];
         boxRow.push(
           <Col key={j} className="d-flex justify-content-center">
             <motion.div
               variants={motionAnimations.boxAnimate}
-              // onAnimationComplete={handleAnimationCompletion}
+              // onAnimationComplete={handleGameAnimationCompletion}
             >
-              {/* <motion.div variants={boxAnimate}> */}
-              <BoxElement
-                id={`gamebox-${gameSettings.gameColors[j].hex.replace(
-                  "#",
-                  ""
-                )}`}
-                colorNum={j}
-                updateColor={handleColorChange}
-                // itemIndex={gameSettings.showItemIndex ? j : ""}
-                colorName={
-                  gameSettings.showColorName
-                    ? gameSettings.gameColors[j].name
-                    : ""
+              <motion.div
+                variants={
+                  gameData.gameInProgress
+                    ? motionAnimations.game
+                    : motionAnimations.boxAnimate
                 }
-                color={gameSettings.gameColors[j].hex}
-                gameColor={gameSettings.gameColors[j]}
-                showNum={gameSettings.showNum}
-                showHex={gameSettings.showHex}
-                showName={gameSettings.showName}
-                gameInProgress={gameSettings.gameInProgress}
-              />
+                initial={gameData.animationItemStep} // animate={gameData.gameSequence[]}
+                onAnimationComplete={handleGameAnimationCompletion}
+              >
+                <BoxElement
+                  id={`gamebox-${gameSettings.gameColors[j].hex.replace(
+                    "#",
+                    ""
+                  )}`}
+                  colorNum={j}
+                  updateColor={handleColorChange}
+                  // itemIndex={gameSettings.showItemIndex ? j : ""}
+                  colorName={
+                    gameSettings.showColorName
+                      ? gameSettings.gameColors[j].name
+                      : ""
+                  }
+                  color={gameSettings.gameColors[j].hex}
+                  gameColor={gameSettings.gameColors[j]}
+                  showNum={gameSettings.showNum}
+                  showHex={gameSettings.showHex}
+                  showName={gameSettings.showName}
+                  gameInProgress={gameSettings.gameInProgress}
+                />
+              </motion.div>
             </motion.div>
           </Col>
         );
@@ -362,9 +261,8 @@ const Game = ({ showScore }) => {
         <motion.div
           variants={motionAnimations.boardAnimateContainer}
           initial="hidden"
-          // animate={gameSettings.gameInProgress ? "exit" : "visible"}
           animate={gameData.animationStep}
-          onAnimationComplete={handleAnimationCompletion}
+          onAnimationComplete={handleGameAnimationCompletion}
         >
           {boxBoard}
         </motion.div>
@@ -382,15 +280,14 @@ const Game = ({ showScore }) => {
     gameSettings.showNum,
     gameSettings.showName,
     gameSettings.showHex,
+    gameData.animationStep,
+    gameData.animationItemStep,
   ]);
 
   // timer useEffect
   useEffect(() => {
-    console.log("useEffect-Timer");
+    console.log("useEffect-Timer", gameData.timer);
     let interval = null;
-
-    console.log("timer", "gameInProgress:", gameSettings.gameInProgress);
-    console.log("timer", "timer:", gameData.timer);
 
     if (gameSettings.gameInProgress && gameData.timer > 0) {
       interval = setInterval(() => {
@@ -407,6 +304,11 @@ const Game = ({ showScore }) => {
     return () => clearInterval(interval);
   }, [gameSettings.gameInProgress, gameData.timer]);
 
+  useEffect(() => {
+    console.log("color animation");
+    if (gameData.animationStep === "start") {
+    }
+  }, [gameData.animationStep]);
   //  --- Form Handlers
   const handleDropdown = (e1) => {
     setGameSettings({ ...gameSettings, shape: e1 });
@@ -483,13 +385,24 @@ const Game = ({ showScore }) => {
     console.log("handleGameStart", e1.target.name);
     console.log("handleGameStart", "answerTime:", formValues.answerTime);
 
+    let sequenceList = gameData.gameSequence;
+
+    if (sequenceList.length === 0) {
+      for (let i = 0; i < 3; i++) {
+        sequenceList.push(getNextSequence());
+      }
+    }
+
+    console.log(sequenceList);
+
     setGameData({
+      ...gameData,
       rounds: 1,
       attempts: 3,
       timer: Number(formValues.answerTime),
-      gameSequence: [],
+      gameSequence: sequenceList,
       userSequence: [],
-      animationStep: "exit",
+      animationStep: "hidden",
     });
     setGameSettings({ ...gameSettings, gameInProgress: true });
   };
@@ -513,12 +426,20 @@ const Game = ({ showScore }) => {
     });
   };
 
-  const handleAnimationCompletion = (definition) => {
-    console.log("handleAnimationCompletion", definition);
+  const handleGameAnimationCompletion = (definition) => {
+    console.log("handleGameAnimationCompletion", definition);
 
-    if (gameSettings.gameInProgress && definition === "exit") {
-      setGameData({ ...gameData, animationStep: "intro" });
+    if (gameSettings.gameInProgress && definition === "hidden") {
+      setGameData({
+        ...gameData,
+        animationStep: "intro",
+        animationItemStep: "idle",
+      });
     }
+  };
+
+  const handleItemAnimationCompletion = (definition) => {
+    console.log("handleItemAnimationCompletion", definition);
   };
 
   console.log("gameSettings", gameSettings);
@@ -556,11 +477,15 @@ const Game = ({ showScore }) => {
 
       <Container className="pt-5">
         <Accordion defaultActiveKey={["1"]} alwaysOpen flush>
-          {!gameSettings.gameInProgress ? (
+          <Collapse in={!gameSettings.gameInProgress} unmountOnExit={true}>
             <Accordion.Item eventKey="0">
               <Accordion.Header>Game Settings</Accordion.Header>
               <Accordion.Body>
-                <Dropdown
+                <SettingsForm
+                  gameSettings={gameSettings}
+                  updateGameSettings={updateGameSettings}
+                />
+                {/* <Dropdown
                   data-bs-theme="dark"
                   className="mb-2 pb-2"
                   onSelect={handleDropdown}
@@ -699,17 +624,19 @@ const Game = ({ showScore }) => {
                       />
                     </InputGroup>
                   ) : null}
-                </Form.Group>
+                </Form.Group> */}
               </Accordion.Body>
             </Accordion.Item>
-          ) : null}
+          </Collapse>
+          {/* ) : 
+          null} */}
           <Accordion.Item eventKey="1">
             <Accordion.Header>Memorize</Accordion.Header>
             <Accordion.Body>
               {gameSettings.gameInProgress ? (
                 <Row
                   style={{ fontSize: ".875rem" }}
-                  className="mb-3 border-bottom justify-content-between pb-2"
+                  className="mb-3 border-bottom justify-content-center pb-2"
                 >
                   <Col className="mx-1 mb-1 px-2 text-center text-light border rounded bg-secondary">
                     Round: 1
@@ -720,11 +647,10 @@ const Game = ({ showScore }) => {
                   <Col className="mx-1 mb-1 px-2 text-center text-light border rounded bg-secondary">
                     Chances: 3
                   </Col>
-                  <Col
-                    className="mx-1 mb-1 px-2 text-center text-light border rounded bg-secondary"
-                    xs={12}
-                  >
-                    Time: {gameData.timer}
+                  <Col className="mb-1 px-2" xs={12}>
+                    <div className="mx-1 text-center text-light border rounded bg-secondary">
+                      Time: {gameData.timer}
+                    </div>
                   </Col>
                 </Row>
               ) : null}

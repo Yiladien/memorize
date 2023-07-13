@@ -4,6 +4,7 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
 import Game from "./pages/Game";
+// import Test from "./pages/Test";
 import EndGameModal from "./components/EndGameModal";
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
   return (
     <div className="text-white bg-dark min-vh-100" data-bs-theme="dark">
       <Game showScore={showScore} />
+      {/* <Test /> */}
       <EndGameModal
         show={modalShow}
         score={endGameData.score}
