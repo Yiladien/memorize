@@ -32,6 +32,7 @@ const BoxElement = ({
   gameColor = { customName: false, name: "", hex: "" },
   gameInProgress = false,
   updateColor,
+  boxRows,
 }) => {
   const nameRef = useRef(null);
 
@@ -75,7 +76,7 @@ const BoxElement = ({
       updateColor(e1.target.dataset.colornum, {
         customName: true,
         name: !editColor.customName
-          ? `Custom ${e1.target.dataset.colornum}`
+          ? `Custom ${Number(e1.target.dataset.colornum) + 1}`
           : editColor.customName,
         hex: editColor.hex,
       });
@@ -84,7 +85,7 @@ const BoxElement = ({
         ...editColor,
         customName: true,
         name: !editColor.customName
-          ? `Custom ${e1.target.dataset.colornum}`
+          ? `Custom ${Number(e1.target.dataset.colornum) + 1}`
           : editColor.name,
         hex: editColor.hex,
       });

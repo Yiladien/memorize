@@ -1,5 +1,5 @@
 // import React from "react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 //bootstrap
 import Container from "react-bootstrap/Container";
@@ -134,6 +134,7 @@ const Game = ({ showScore }) => {
       4: { customName: false, name: "Green", hex: "#008000" },
     },
     boxRows: 3,
+    boxWidth: "",
     showItemIndex: true,
     showColorName: true,
     showNum: false,
@@ -161,7 +162,12 @@ const Game = ({ showScore }) => {
   //     orientation: "portrait",
   //   });
 
+  //----for testing
+
   const [boxBoard, setBoxBoard] = useState([]);
+
+  const boardRef = useRef(null);
+  const [boardWidth, setBoardWidth] = useState(0);
 
   function updateGameSettings(formSettings) {
     setGameSettings({ ...formSettings });
@@ -200,7 +206,7 @@ const Game = ({ showScore }) => {
       for (let j = 0; j < gameSettings.itemCount; j++) {
         gameSettings.gameColors[j];
         boxRow.push(
-          <Col key={j} className="d-flex justify-content-center">
+          <div key={j} className="d-flex justify-content-center px-0 mx-0">
             <motion.div
               variants={motionAnimations.boxAnimate}
               // onAnimationComplete={handleGameAnimationCompletion}
@@ -233,10 +239,13 @@ const Game = ({ showScore }) => {
                   showHex={gameSettings.showHex}
                   showName={gameSettings.showName}
                   gameInProgress={gameSettings.gameInProgress}
+                  // viewWindowWidth={viewWindowWidth}
+                  boxRows={gameSettings.boxRows}
+                  boardWidth={boardWidth}
                 />
               </motion.div>
             </motion.div>
-          </Col>
+          </div>
         );
 
         //   to create a square-ish shape, adding a row after each group of boxes match the row count. (determined by the form handleChange function)
@@ -247,7 +256,7 @@ const Game = ({ showScore }) => {
           boxBoard.push(
             <Row
               key={`row-${((j + 1) / gameSettings.boxRows).toFixed(1)}`}
-              className="d-flex justify-content-center flex-wrap g-2 row-cols-auto mb-2"
+              className="d-flex justify-content-center flex-wrap row-cols-auto px-0 mb-2 position-relative"
             >
               {boxRow}
             </Row>
@@ -282,6 +291,7 @@ const Game = ({ showScore }) => {
     gameSettings.showHex,
     gameData.animationStep,
     gameData.animationItemStep,
+    boardWidth,
   ]);
 
   // timer useEffect
@@ -304,77 +314,7 @@ const Game = ({ showScore }) => {
     return () => clearInterval(interval);
   }, [gameSettings.gameInProgress, gameData.timer]);
 
-  useEffect(() => {
-    console.log("color animation");
-    if (gameData.animationStep === "start") {
-    }
-  }, [gameData.animationStep]);
-  //  --- Form Handlers
-  const handleDropdown = (e1) => {
-    setGameSettings({ ...gameSettings, shape: e1 });
-  };
-
-  const handleSwitch = (e1, e2, e3) => {
-    console.log("switch", e1.target.checked);
-    console.log("switch", e1.target.name);
-    e2 && console.log("switch", e2.target);
-    e3 && console.log("switch", e3.target);
-
-    setGameSettings({ ...gameSettings, [e1.target.name]: e1.target.checked });
-  };
-
-  const handleChange = (e1, minValue, maxValue) => {
-    console.log(e1.target.name);
-    console.log(minValue);
-    console.log(maxValue);
-
-    setFormValues({
-      ...formValues,
-      [e1.target.name]: e1.target.value,
-    });
-
-    if (e1.target.value < minValue || e1.target.value > maxValue) {
-      return;
-    } else {
-      if (e1.target.name === "itemCount") {
-        console.log("getting new color", e1.target.value);
-        let colorList = { ...gameSettings.gameColors };
-        console.log(colorList);
-
-        // adding new colors if value increases as needed. Keeping old values to retain colors that may have already been accepted or changed by user
-
-        for (let i = Object.keys(colorList).length; i < e1.target.value; i++) {
-          colorList = {
-            ...colorList,
-            [i]: getUniqueColor(colorList, e1.target.value),
-          };
-        }
-        console.log(colorList);
-
-        const rows = Math.ceil(Math.sqrt(Number(e1.target.value)));
-        e1 && console.log("rows", rows);
-
-        setGameSettings({
-          ...gameSettings,
-          [e1.target.name]: e1.target.value,
-          boxRows: rows,
-          gameColors: colorList,
-        });
-      } else {
-        setGameSettings({
-          ...gameSettings,
-          [e1.target.name]: e1.target.value,
-        });
-      }
-    }
-  };
-
   const handleColorChange = (colornum, colorObj) => {
-    console.log(colornum);
-    console.log(colorObj);
-    // let updateList = {...gameSettings.gameColors};
-    // updateList.splice(colornum, 1, colorObj);
-
     setGameSettings({
       ...gameSettings,
       gameColors: { ...gameSettings.gameColors, [colornum]: colorObj },
@@ -426,6 +366,12 @@ const Game = ({ showScore }) => {
     });
   };
 
+  useEffect(() => {
+    console.log("color animation");
+    if (gameData.animationStep === "start") {
+    }
+  }, [gameData.animationStep]);
+
   const handleGameAnimationCompletion = (definition) => {
     console.log("handleGameAnimationCompletion", definition);
 
@@ -444,6 +390,21 @@ const Game = ({ showScore }) => {
 
   console.log("gameSettings", gameSettings);
   console.log("gameData", gameData);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const elementWidth = boardRef.current.offsetWidth;
+      console.log("boardWidth", elementWidth);
+      setBoardWidth(elementWidth);
+    };
+
+    handleResize(); // Get initial width
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <>
@@ -465,9 +426,13 @@ const Game = ({ showScore }) => {
     }
 
     .box-element {
-        width: 5rem;
-        height: 5rem;
-        border-radius: 1rem;
+        width: min(5em, ${boardWidth / gameSettings.boxRows}px - .${
+          25 * gameSettings.boxRows + 1
+        }rem);
+        height: min(5em, ${boardWidth / gameSettings.boxRows}px - .${
+          25 * gameSettings.boxRows + 1
+        }rem);
+        border-radius: min(1rem, 20%);
         cursor: pointer;
       }
     `}
@@ -485,146 +450,6 @@ const Game = ({ showScore }) => {
                   gameSettings={gameSettings}
                   updateGameSettings={updateGameSettings}
                 />
-                {/* <Dropdown
-                  data-bs-theme="dark"
-                  className="mb-2 pb-2"
-                  onSelect={handleDropdown}
-                >
-                  <Dropdown.Toggle
-                    id="shape-dropdown"
-                    variant="secondary"
-                    className="text-capitalize"
-                  >
-                    {gameSettings.shape}
-                  </Dropdown.Toggle>
-
-                  <Dropdown.Menu>
-                    <Dropdown.Item eventKey="box">Box</Dropdown.Item>
-                    <Dropdown.Item eventKey="circle">Circle</Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-
-                <Form.Label className="me-2 w-100">
-                  How many to Memorize:
-                </Form.Label>
-                <InputGroup
-                  variant="secondary"
-                  size="sm"
-                  className="mb-2 position-relative border-bottom"
-                  hasValidation
-                >
-                  <Button variant="secondary" className="pe-none">
-                    # of items
-                  </Button>
-                  <Form.Control
-                    aria-label="number-of-items"
-                    aria-describedby="number-of-items-to-memorize"
-                    value={formValues.itemCount}
-                    onChange={handleChange}
-                    name="itemCount"
-                    isInvalid={
-                      formValues.itemCount < formValues.minItems ||
-                      formValues.itemCount > formValues.maxItems
-                    }
-                  />
-                  <Form.Control.Feedback type="invalid" tooltip>
-                    {`Must be between ${formValues.minItems} and ${formValues.maxItems}`}
-                  </Form.Control.Feedback>
-                  <Form.Range
-                    onChange={(event) =>
-                      handleChange(
-                        event,
-                        formValues.minItems,
-                        formValues.maxItems
-                      )
-                    }
-                    value={formValues.itemCount}
-                    name="itemCount"
-                    min={formValues.minItems}
-                    max={formValues.maxItems}
-                  />
-                </InputGroup>
-                <Form.Group className="mb-2 border-bottom">
-                  <Form.Label className="me-2 w-100">Display:</Form.Label>
-                  <Form.Check
-                    id="switch-num"
-                    inline
-                    label="Number"
-                    name="showNum"
-                    type="switch"
-                    onChange={handleSwitch}
-                    checked={gameSettings.showNum}
-                  />
-                  <Form.Check
-                    id="switch-name"
-                    inline
-                    label="Name"
-                    name="showName"
-                    type="switch"
-                    onChange={handleSwitch}
-                    checked={gameSettings.showName}
-                  />
-                  <Form.Check
-                    id="switch-hex"
-                    inline
-                    label="Hex"
-                    name="showHex"
-                    type="switch"
-                    onChange={handleSwitch}
-                    checked={gameSettings.showHex}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-2 border-bottom">
-                  <Form.Label className="me-2 w-100">Timer:</Form.Label>
-                  <Form.Check
-                    id="switch-answer-timer"
-                    inline
-                    label="Time Limit"
-                    name="answerTimer"
-                    type="switch"
-                    onChange={handleSwitch}
-                    checked={gameSettings.answerTimer}
-                  />
-                  {gameSettings.answerTimer ? (
-                    <InputGroup
-                      variant="secondary"
-                      size="sm"
-                      className="mb-2 position-relative"
-                      hasValidation
-                    >
-                      <Button variant="secondary" className="pe-none">
-                        Seconds
-                      </Button>
-                      <Form.Control
-                        aria-label="answer-time"
-                        aria-describedby="time-to-answer-game"
-                        value={formValues.answerTime}
-                        onChange={handleChange}
-                        name="answerTime"
-                        isInvalid={
-                          formValues.answerTime < formValues.minAnswerTime ||
-                          formValues.answerTime > formValues.maxAnswerTime
-                        }
-                      />
-                      <Form.Control.Feedback type="invalid" tooltip>
-                        {`Must be between ${formValues.minAnswerTime} and ${formValues.maxAnswerTime}`}
-                      </Form.Control.Feedback>
-                      <Form.Range
-                        onChange={(event) =>
-                          handleChange(
-                            event,
-                            formValues.minAnswerTime,
-                            formValues.maxAnswerTime
-                          )
-                        }
-                        value={formValues.answerTime}
-                        name="answerTime"
-                        min={formValues.minAnswerTime}
-                        max={formValues.maxAnswerTime}
-                      />
-                    </InputGroup>
-                  ) : null}
-                </Form.Group> */}
               </Accordion.Body>
             </Accordion.Item>
           </Collapse>
@@ -655,7 +480,10 @@ const Game = ({ showScore }) => {
                 </Row>
               ) : null}
               {!gameSettings.gameInProgress ? (
-                <Row className="mb-3 border-bottom justify-content-center pb-2">
+                <Row
+                  ref={boardRef}
+                  className="mb-3 border-bottom justify-content-center pb-2"
+                >
                   <Col className="mx-1 px-2 d-grid">
                     <Button
                       variant="primary"
